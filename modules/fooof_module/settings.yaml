@@ -1,0 +1,31 @@
+analyze_channel: 14.0
+channels_to_load: 13-16,24
+condition_groupings:
+  '1':
+    label: audio_visual
+    conditions:
+    - known_av
+    - meant_av
+    - last_av
+    - drive_av
+  '2':
+    label: auditory_only
+    conditions:
+    - last_a
+    - drive_a
+    - known_a
+    - meant_a
+  '3':
+    label: visual_only
+    conditions:
+    - last_v
+    - drive_v
+    - known_v
+    - meant_v
+epoch_name: auditory_onset
+project_name: demo
+reference_name: default
+subject_code: DemoSubject
+time_window_to_load:
+- -1
+- 2

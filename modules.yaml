@@ -1,10 +1,10 @@
-divider:
-  Preprocess:
-    order: 0
-  Built-ins:
-    order: 10
-  Settings:
-    order: 10000
+groups:
+  Import Signals:
+    order: 1
+    open: no
+  Images & Electrodes:
+    order: 7
+    open: no
 modules:
   import_lfp_native:
     label: Native Structure
@@ -65,10 +65,12 @@ modules:
     label: Stimulation Explorer
   phase_explorer:
     label: Phase Explorer
-groups:
-  Import Signals:
-    order: 1
-    open: no
-  Images & Electrodes:
-    order: 7
-    open: no
+  fooof_module:
+    label: Fooof
+divider:
+  Preprocess:
+    order: 0
+  Built-ins:
+    order: 10
+  Settings:
+    order: 10000
