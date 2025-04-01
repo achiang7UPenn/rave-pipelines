@@ -1,10 +1,10 @@
-divider:
-  Preprocess:
-    order: 0
-  Built-ins:
-    order: 10
-  Settings:
-    order: 10000
+groups:
+  Import Signals:
+    order: 1
+    open: no
+  Images & Electrodes:
+    order: 7
+    open: no
 modules:
   import_lfp_native:
     label: Native Structure
@@ -24,20 +24,16 @@ modules:
     badge: Local|badge-warning
   notch_filter:
     label: Notch Filter
-    group: LFP Processing
-    order: 2.1
+    order: 3
   wavelet_module:
     label: Wavelet
-    group: LFP Processing
-    order: 2.2
+    order: 4
   epoch_generator:
     label: Generate Epoch
-    group: Auxiliary Processing
-    order: 3.1
+    order: 5
   reference_module:
     label: Reference Channels
-    group: LFP Processing
-    order: 2.3
+    order: 6
   surface_reconstruction:
     label: MRI/CT Preprocessing
     group: Images & Electrodes
@@ -69,16 +65,12 @@ modules:
     label: Stimulation Explorer
   phase_explorer:
     label: Phase Explorer
-groups:
-  Import Signals:
-    order: 1
-    open: no
-  LFP Processing:
-    order: 2
-    open: no
-  Auxiliary Processing:
-    order: 3
-    open: no
-  Images & Electrodes:
-    order: 7
-    open: no
+  fooof_module:
+    label: Fooof
+divider:
+  Preprocess:
+    order: 0
+  Built-ins:
+    order: 10
+  Settings:
+    order: 10000

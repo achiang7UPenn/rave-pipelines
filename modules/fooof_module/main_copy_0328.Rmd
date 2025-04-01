@@ -1,0 +1,285 @@
+---
+title: "RAVE Pipeline Markdown Template"
+output:
+  html_document: default
+  pdf_document: default
+editor_options:
+  chunk_output_type: console
+---
+
+```{r setup, include = FALSE}
+# This code block sets up the engine environment
+# Please do not remove me
+raveio::pipeline_setup_rmd("fooof_module")
+rpymat::ensure_rpymat()
+```
+
+<!-- Begin: pipeline code -->
+
+Load data
+
+```{r load_rave_subject, use_rave = TRUE, export = "subject", format = "rave-subject"}
+subject = raveio::RAVESubject$new(project_name = project_name, subject_code = subject_code)
+```
+
+```{r load_rave_repository, use_rave = TRUE, export = "repository", format = "rave_prepare_subject_voltage_with_epoch"}
+repository = raveio::prepare_subject_voltage_with_epoch(
+  subject = subject,
+  electrodes = channels_to_load,
+  epoch_name = epoch_name,
+  reference_name = reference_name,
+  time_windows = time_window_to_load,
+)
+```
+
+```{r prepare_data_for_fooof, use_rave = TRUE, deps = "repository", export = "data_for_fooof"}
+data_for_fooof = list(
+  sample_rate = repository$subject$raw_sample_rates,
+  electrodes = repository$electrode_list,
+  analyze_channel = analyze_channel,
+  epoch_table = repository$epoch_table,
+  condition_groupings = unname(condition_groupings),
+  voltage = repository$voltage$data_list[[sprintf("e_%d", analyze_channel)]]
+)
+```
+
+```{r prepare_trial_subset, use_rave = TRUE, deps = "repository", export = "subset_analyzed"}
+process_data <- function(repository, conditions_analyzed) {
+  # Apply the condition to filter rows
+  trial_selection <- repository$epoch_table$Condition %in% conditions_analyzed
+  sub_volt <- subset(repository$voltage$data_list$e_14, Trial ~ trial_selection)
+
+  # Calculate the mean across the first two dimensions
+  matrix_volt <- apply(sub_volt, c(1, 2), mean)
+
+  # Convert the matrix to a dataframe
+  df_volt <- as.data.frame(matrix_volt)
+
+  # Set column names for trials as they appear in the original array
+  colnames(df_volt) <- dimnames(sub_volt)$Trial
+
+  # Add 'Time' as a new column in the dataframe
+  df_volt$Time <- as.numeric(dimnames(sub_volt)$Time)
+
+  # Rearrange the dataframe to have 'Time' as the first column
+  subset_analyzed <- df_volt[c("Time", dimnames(sub_volt)$Trial)]
+
+  # Return the processed DataFrame
+  return(subset_analyzed)
+}
+conditions_analyzed = c("drive_a", "meant_a")
+subset_analyzed = process_data(repository=repository, conditions_analyzed=conditions_analyzed)
+
+
+```
+
+
+```{r}
+# repository$voltage$data_list$e_14
+```
+
+
+```{python}
+subset_analyzed = r.subset_analyzed
+
+```
+
+
+```{python generate_power_outputs, use_rave = TRUE, deps = "subset_analyzed", export = "power_outputs"}
+# Parameters for preprocessing (you should adjust these based on your actual requirements)
+fs = 2000
+nperseg = 4000
+freq_range = [1, 175]
+
+
+power_outputs = shared.preprocess_powers(subset_analyzed, fs=fs, nperseg=nperseg, freq_range=freq_range)
+power_outputs = shared.add_mean_and_std(power_outputs)
+```
+
+
+
+```{python plot_trials, use_rave = TRUE, deps = "power_outputs"}
+individual_trials = False
+shared.plot_trials(power_outputs, individual_trials=individual_trials)
+```
+
+
+```{python fit_fooof_on_average, use_rave = TRUE, deps = "power_outputs"}
+filtered_frequency = power_outputs['filtered_frequency']
+average_power = power_outputs['Average Power']
+shared.fit_fooof(filtered_frequency, average_power)
+```
+
+
+Tuning coming next!!!
+
+Tuning max_n_peaks
+
+```{python tune_max_n_peaks, use_rave = TRUE, deps = "power_outputs"}
+freq_range = [1, 175]
+aperiodic_mode='fixed'
+peaks_range = shared.np.arange(9)
+
+
+filtered_freqs = power_outputs['filtered_frequency']
+filtered_powers = power_outputs['Average Power']
+
+
+shared.tune_max_n_peaks(filtered_freqs=filtered_freqs, filtered_powers=filtered_powers, freq_range=freq_range, aperiodic_mode=aperiodic_mode, peaks_range=peaks_range)
+```
+
+
+
+Tuning aperiodic_mode
+
+```{python tune_aperiodic_mode, use_rave = TRUE, deps = "power_outputs"}
+filtered_freqs = power_outputs['filtered_frequency']
+filtered_powers = power_outputs['Average Power']
+freq_range = [1, 175]
+max_n_peaks=4
+
+
+shared.tune_aperiodic_mode(filtered_freqs=filtered_freqs, filtered_powers=filtered_powers, freq_range=freq_range, max_n_peaks=max_n_peaks, show_errors=True)
+
+```
+
+
+
+Tuning peak_threshold
+
+```{python tune_peak_threshold, use_rave = TRUE, deps = "power_outputs"}
+freq_range = [1, 175]
+max_n_peaks=4
+aperiodic_mode="knee"
+peak_threshold_range = shared.np.logspace(start = 0, stop = 1, num = 100)
+
+filtered_freqs = power_outputs['filtered_frequency']
+filtered_powers = power_outputs['Average Power']
+
+shared.tune_peak_threshold(filtered_freqs=filtered_freqs, filtered_powers=filtered_powers, freq_range=freq_range, max_n_peaks=max_n_peaks, aperiodic_mode=aperiodic_mode, peak_threshold_range=peak_threshold_range, show_errors=True)
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Calculate the correlation coefficients
+
+```{python}
+data_for_fooof = r.data_for_fooof
+data_for_fooof
+```
+
+
+
+
+```{python}
+first_row_data = data_for_fooof['voltage'][0]
+# first_row_data
+fs = 2000
+nperseg = 4000
+freq_range = [1, 175]
+
+max_n_peaks = 3
+aperiodic_mode = "fixed"
+plt_log = False
+report = True
+
+filtered_freqs, filtered_powers = shared.preprocess_data(first_row_data, fs, freq_range, nperseg)
+# filtered_freqs
+shared.generate_model_fit(filtered_freqs, filtered_powers, freq_range = freq_range, max_n_peaks = max_n_peaks, aperiodic_mode = aperiodic_mode, plt_log = plt_log, report = report)
+
+# plt.plot(np.arrange(0, len(first_row_data) / fs, 1/fs), first_row_data)
+```
+
+
+```{python}
+max_n_peaks = 10000
+aperiodic_mode = "fixed"
+plt_log = False
+report = False
+
+first_row_data = data_for_fooof['voltage'][0]
+first_row_data
+fs = 200
+nperseg = 20
+freq_range = [1, 175]
+filtered_freqs, filtered_powers = shared.preprocess_data(first_row_data, fs, freq_range, nperseg)
+filtered_freqs
+filtered_powers
+
+fm = shared.SpectralModel(max_n_peaks = max_n_peaks, aperiodic_mode = aperiodic_mode)
+fm.fit(filtered_freqs, filtered_powers, freq_range)
+fm.plot(plt_log = plt_log)
+shared.plt.show()
+```
+
+
+
+```{r}
+raveio::prep
+```
+
+
+
+```{python}
+electrode = '14'
+block = '11'
+frequency = 2000
+length = 0.1
+timestamp = 0
+_ = shared.extract_data(electrode, block, frequency, timestamp, length, plot=True)
+
+length = 1.5
+_ = extract_data(electrode, block, frequency, timestamp, length, plot=True)
+```
+
+
+
+
+
+
+
+```{python calculate_correlation, use_rave = TRUE, deps = "data_for_fooof", export = "correlation"}
+correlation = shared.fooof_function1(data_for_fooof)
+```
+
+<!-- End: pipeline code -->
+
+## Build, Visualize, & Run
+
+Please make sure the following code block is at the end of your pipeline file. This block will build the pipeline and generate a `make-fooof_module.R` script with your pipeline markdown file. `RAVE` will use the generated pipeline script to execute the pipeline in the dashboard application, or in massive production mode.
+
+```{r build, echo=FALSE, results='hide'}
+build_pipeline(make_file = "make-fooof_module.R")
+```
+
+
+Once the pipeline script `make-fooof_module.R` is built, you can visualize and execute the pipeline without the need of re-knit this document. Notice we use `r` block instead of `rave`. (This is because the code blocks are not part of pipeline targets.)
+
+```{r visualize, echo=FALSE}
+# Fixed usage, show pipeline graph
+try({
+  asNamespace("raveio")$pipeline_dependency_graph(
+    pipeline_path = ".", glimpse = TRUE)
+}, silent = TRUE)
+```
+
+
+
+
+
+

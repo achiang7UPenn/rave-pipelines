@@ -1,0 +1,103 @@
+
+
+module_html <- function(){
+
+  shiny::fluidPage(
+    shiny::fluidRow(
+
+      shiny::column(
+        width = 3L,
+        shiny::div(
+          # class = "row fancy-scroll-y stretch-inner-height",
+          class = "row screen-height overflow-y-scroll",
+          shiny::column(
+            width = 12L,
+
+            electrode_selector$ui_func(),
+
+            comp_condition_groups$ui_func(),
+
+            # baseline_choices$ui_func(),
+
+            # defines a panel
+            ravedash::input_card(
+              title = "Configure Analysis",
+
+              # a collection of inputs
+              ravedash::flex_group_box(
+                title = "Fooof Parameters",
+
+                # first item
+                shidashi::flex_item(
+                  shiny::sliderInput(
+                    inputId = ns("fooof_winlen"),
+                    label = "Window length",
+                    min = 0,
+                    max = 4,
+                    value = 1,
+                    step = 0.1,
+                    post = " s"
+                  )
+                ),
+
+                # break the elements into two rows
+                shidashi::flex_break(),
+
+                # second item is the frequency range
+                shidashi::flex_item(
+                  shiny::sliderInput(
+                    inputId = ns("fooof_freq_range"),
+                    label = "Frequency range",
+                    min = 1,
+                    max = 300,
+                    value = 200,
+                    step = 0.1,
+                    post = " Hz"
+                  )
+                )
+
+              )
+            )
+
+          )
+        )
+      ),
+
+      shiny::column(
+        width = 9L,
+        shiny::div(
+          class = "row screen-height overflow-y-scroll output-wrapper",
+          shiny::column(
+            width = 12L,
+
+
+            ravedash::output_card(
+              'Collapsed over frequency',
+              class_body = "no-padding fill-width height-450 min-height-450 resize-vertical",
+              shiny::div(
+                class = 'position-relative fill',
+                # shiny::plotOutput(ns("collapse_over_trial"), width = '100%', height = "100%")
+                plotly::plotlyOutput(ns("collapse_over_trial"), width = '100%', height = "100%")
+              )
+            ),
+
+            ravedash::output_card(
+              "My output name",
+              class_body = "no-padding fill-width height-450 min-height-450 resize-vertical",
+              shiny::div(
+                class = 'position-relative fill',
+
+                shiny::verbatimTextOutput(
+                  outputId = ns("fooof_print_results")
+                )
+              )
+            )
+
+
+          )
+        )
+      )
+
+    )
+  )
+}
