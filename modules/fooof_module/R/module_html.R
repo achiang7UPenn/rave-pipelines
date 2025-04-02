@@ -54,17 +54,6 @@ module_html <- function(){
                     step = 0.1,
                     post = " Hz"
                   )
-                ),
-
-                shidashi::flex_break(),
-
-                # third item is the boolean input
-                shidashi::flex_item(
-                  shiny::checkboxInput(
-                    inputId = ns("fooof_bool"),
-                    label = "Boolean input",
-                    value = FALSE  # Default value is FALSE, change to TRUE if you want it checked by default
-                  )
                 )
 
               )
@@ -87,8 +76,18 @@ module_html <- function(){
               class_body = "no-padding fill-width height-450 min-height-450 resize-vertical",
               shiny::div(
                 class = 'position-relative fill',
-                # shiny::plotOutput(ns("collapse_over_trial"), width = '100%', height = "100%")
-                plotly::plotlyOutput(ns("collapse_over_trial"), width = '100%', height = "100%")
+                shiny::uiOutput(ns("collapse_over_trial"), width = '100%', height = "100%")
+                # plotly::plotlyOutput(ns("collapse_over_trial"), width = '100%', height = "100%")
+              )
+            ),
+
+            ravedash::output_card(
+              'Individual Trials',
+              class_body = "no-padding fill-width height-450 min-height-450 resize-vertical",
+              shiny::div(
+                class = 'position-relative fill',
+                shiny::uiOutput(ns("individual_trials_plot"), width = '100%', height = "100%")
+                # plotly::plotlyOutput(ns("collapse_over_trial"), width = '100%', height = "100%")
               )
             ),
 
@@ -101,16 +100,6 @@ module_html <- function(){
                 shiny::verbatimTextOutput(
                   outputId = ns("fooof_print_results")
                 )
-              )
-            ),
-
-            ravedash::output_card(
-              'Testing',
-              class_body = "no-padding fill-width height-450 min-height-450 resize-vertical",
-              shiny::div(
-                class = 'position-relative fill',
-                # shiny::plotOutput(ns("collapse_over_trial"), width = '100%', height = "100%")
-                plotly::plotlyOutput(ns("testing"), width = '100%', height = "100%")
               )
             )
 

@@ -240,7 +240,7 @@ def plot_trials(df, individual_trials=False):
     )
 
     # Show the figure
-    fig.show()
+    return fig
     
     
 def plot_raw_data(data, fs):

@@ -86,8 +86,7 @@ module_server <- function(input, output, session, ...){
 
         # Customized inputs
         window_length = input$fooof_winlen,
-        freq_range = c(1, input$fooof_freq_range),
-        individual_trials = input$fooof_bool
+        freq_range = c(1, input$fooof_freq_range)
       )
 
       # Step 2: save user inputs to settings.yaml
@@ -155,8 +154,8 @@ module_server <- function(input, output, session, ...){
   )
 
   # Register outputs
-  # output$collapse_over_trial <- shiny::renderPlot({
-  output$collapse_over_trial <- plotly::renderPlotly({
+  # output$collapse_over_trial <- shiny::renderUI({
+  output$collapse_over_trial <- shiny::renderUI({
     shiny::validate(
       shiny::need(
         length(local_reactives$update_outputs) &&
@@ -168,26 +167,44 @@ module_server <- function(input, output, session, ...){
     # retrieve the `power_outputs` from `local_data`
     power_outputs <- local_data$power_outputs
 
-    # Use R's plotting engine:
-    power_outputs_r <- rpymat::py_to_r(power_outputs)
+    # For debug purposes, run
+    # pipeline <- raveio::pipeline("fooof_module", paths = "/Users/dipterix/Dropbox (Personal)/projects/rave-pipeline-ese2025/modules/")
+    # power_outputs <- pipeline$read("power_outputs")
 
-    plotly::plot_ly(
-      data = power_outputs_r
-    ) |>
-      plotly::add_lines(
-        x = ~filtered_frequency,
-        y = ~10 * log10(`Average Power`)
-      ) |>
-      plotly::add_lines(
-        x = ~filtered_frequency,
-        y = ~10 * log10(`StdDev`)
-      ) |>
-      plotly::layout(
-        title = "Average p-welch over trial",
-        xaxis = list(title = "Frequency"),
-        yaxis = list(title = "Decibel Power")
-      )
+    # individual_trials = False
+    # shared.plot_trials(power_outputs, individual_trials=individual_trials)
+
+    shared <- pipeline$python_module(type = "shared")
+    plot <- shared$plot_trials(power_outputs, individual_trials = FALSE)
+
+    return(shiny::HTML(rpymat::py_to_r(plot$to_html())))
   })
+
+  output$individual_trials_plot <- shiny::renderUI({
+    shiny::validate(
+      shiny::need(
+        length(local_reactives$update_outputs) &&
+          !isFALSE(local_reactives$update_outputs),
+        message = "Please run the module first"
+      )
+    )
+
+    # retrieve the `power_outputs` from `local_data`
+    power_outputs <- local_data$power_outputs
+
+    # For debug purposes, run
+    # pipeline <- raveio::pipeline("fooof_module", paths = "/Users/dipterix/Dropbox (Personal)/projects/rave-pipeline-ese2025/modules/")
+    # power_outputs <- pipeline$read("power_outputs")
+
+    # individual_trials = False
+    # shared.plot_trials(power_outputs, individual_trials=individual_trials)
+
+    shared <- pipeline$python_module(type = "shared")
+    plot <- shared$plot_trials(power_outputs, individual_trials = TRUE)
+
+    return(shiny::HTML(rpymat::py_to_r(plot$to_html())))
+  })
+
 
   output$fooof_print_results <- shiny::renderPrint({
     shiny::validate(

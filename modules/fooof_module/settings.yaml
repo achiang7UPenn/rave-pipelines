@@ -1,4 +1,4 @@
-analyze_channel: 13.0
+analyze_channel: 15.0
 channels_to_load: 13-16,24
 condition_groupings:
   '1':

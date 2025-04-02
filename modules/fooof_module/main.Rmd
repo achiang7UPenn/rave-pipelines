@@ -114,7 +114,12 @@ shared.plot_trials(power_outputs, individual_trials=individual_trials)
 ```{python fit_fooof_on_average, use_rave = FALSE, deps = "power_outputs"}
 filtered_frequency = power_outputs['filtered_frequency']
 average_power = power_outputs['Average Power']
-shared.fit_fooof(filtered_frequency, average_power)
+title = None
+freq_range = [1,300]
+max_n_peaks = 10000
+aperiodic_mode = "fixed"
+plt_log = False
+shared.fit_fooof(filtered_frequency, average_power, title=title, freq_range=freq_range, max_n_peaks=max_n_peaks, aperiodic_mode=aperiodic_mode, plt_log=plt_log)
 ```
 
 
