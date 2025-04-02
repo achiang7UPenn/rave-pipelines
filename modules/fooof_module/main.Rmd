@@ -47,7 +47,7 @@ data_for_fooof = list(
 )
 ```
 
-```{rave prepare_trial_subset, use_rave = TRUE, deps = "repository", export = "subset_analyzed"}
+```{rave prepare_trial_subset, use_rave = TRUE, deps = c("repository", "condition_groupings"), export = "subset_analyzed"}
 process_data <- function(repository, conditions_analyzed) {
   # Apply the condition to filter rows
   trial_selection <- repository$epoch_table$Condition %in% conditions_analyzed
@@ -71,8 +71,8 @@ process_data <- function(repository, conditions_analyzed) {
   # Return the processed DataFrame
   return(subset_analyzed)
 }
-conditions_analyzed = c("drive_a", "meant_a")
-subset_analyzed = process_data(repository=repository, conditions_analyzed=conditions_analyzed)
+conditions_analyzed <- condition_groupings[['1']][['conditions']]
+subset_analyzed <- process_data(repository=repository, conditions_analyzed=conditions_analyzed)
 
 
 ```
@@ -103,7 +103,6 @@ freq_range = freq_range
 power_outputs = shared.preprocess_powers(subset_analyzed, fs=fs, nperseg=nperseg, freq_range=freq_range)
 power_outputs = shared.add_mean_and_std(power_outputs)
 ```
-
 
 
 ```{python plot_trials_welch, use_rave = FALSE, deps = "power_outputs"}

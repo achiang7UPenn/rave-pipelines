@@ -86,7 +86,8 @@ module_server <- function(input, output, session, ...){
 
         # Customized inputs
         window_length = input$fooof_winlen,
-        freq_range = c(1, input$fooof_freq_range)
+        freq_range = c(1, input$fooof_freq_range),
+        individual_trials = input$fooof_bool
       )
 
       # Step 2: save user inputs to settings.yaml
@@ -153,10 +154,6 @@ module_server <- function(input, output, session, ...){
     ignoreInit = FALSE
   )
 
-
-
-
-
   # Register outputs
   # output$collapse_over_trial <- shiny::renderPlot({
   output$collapse_over_trial <- plotly::renderPlotly({
@@ -171,16 +168,6 @@ module_server <- function(input, output, session, ...){
     # retrieve the `power_outputs` from `local_data`
     power_outputs <- local_data$power_outputs
 
-    # For debug purposes, run
-    # pipeline <- raveio::pipeline("fooof_module", paths = "/Users/dipterix/Dropbox (Personal)/projects/rave-pipeline-ese2025/modules/")
-    # power_outputs <- pipeline$run("power_outputs")
-
-    # individual_trials = False
-    # shared.plot_trials(power_outputs, individual_trials=individual_trials)
-
-    # shared <- pipeline$python_module(type = "shared")
-    # shared$plot_trials(power_outputs, individual_trials = FALSE)
-
     # Use R's plotting engine:
     power_outputs_r <- rpymat::py_to_r(power_outputs)
 
@@ -191,19 +178,15 @@ module_server <- function(input, output, session, ...){
         x = ~filtered_frequency,
         y = ~10 * log10(`Average Power`)
       ) |>
+      plotly::add_lines(
+        x = ~filtered_frequency,
+        y = ~10 * log10(`StdDev`)
+      ) |>
       plotly::layout(
         title = "Average p-welch over trial",
         xaxis = list(title = "Frequency"),
         yaxis = list(title = "Decibel Power")
       )
-    # plot(
-    #   x = power_outputs_r[["filtered_frequency"]],
-    #   y = 10 * log10(power_outputs_r[["Average Power"]]),
-    #   type = "l",
-    #   xlab = "Frequency",
-    #   ylab = bquote("10 "~log[10](~"Power")~" (dB)"),
-    #   main = "Average p-welch over trial"
-    # )
   })
 
   output$fooof_print_results <- shiny::renderPrint({
@@ -232,6 +215,5 @@ module_server <- function(input, output, session, ...){
     cat(report)
   })
 
-
-
 }
+

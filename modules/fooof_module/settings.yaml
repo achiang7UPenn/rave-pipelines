@@ -25,6 +25,7 @@ epoch_name: auditory_onset
 freq_range:
 - 1.0
 - 200.0
+individual_trials: no
 project_name: demo
 reference_name: default
 subject_code: DemoSubject

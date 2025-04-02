@@ -32,6 +32,9 @@ rm(._._env_._.)
         }), deps = "settings"), input_project_name = targets::tar_target_raw("project_name", 
         quote({
             settings[["project_name"]]
+        }), deps = "settings"), input_individual_trials = targets::tar_target_raw("individual_trials", 
+        quote({
+            settings[["individual_trials"]]
         }), deps = "settings"), input_freq_range = targets::tar_target_raw("freq_range", 
         quote({
             settings[["freq_range"]]
@@ -160,8 +163,8 @@ rm(._._env_._.)
                   subset_analyzed <- df_volt[c("Time", dimnames(sub_volt)$Trial)]
                   return(subset_analyzed)
                 }
-                conditions_analyzed = c("drive_a", "meant_a")
-                subset_analyzed = process_data(repository = repository, 
+                conditions_analyzed <- condition_groupings[["1"]][["conditions"]]
+                subset_analyzed <- process_data(repository = repository, 
                   conditions_analyzed = conditions_analyzed)
             })
             tryCatch({
@@ -186,12 +189,13 @@ rm(._._env_._.)
                     subset_analyzed <- df_volt[c("Time", dimnames(sub_volt)$Trial)]
                     return(subset_analyzed)
                   }
-                  conditions_analyzed = c("drive_a", "meant_a")
-                  subset_analyzed = process_data(repository = repository, 
+                  conditions_analyzed <- condition_groupings[["1"]][["conditions"]]
+                  subset_analyzed <- process_data(repository = repository, 
                     conditions_analyzed = conditions_analyzed)
                 }
                 subset_analyzed
-            }), target_depends = "repository"), deps = "repository", 
+            }), target_depends = c("repository", "condition_groupings"
+            )), deps = c("repository", "condition_groupings"), 
         cue = targets::tar_cue("thorough"), pattern = NULL, iteration = "list"), 
     generate_power_outputs = targets::tar_target_raw(name = "power_outputs", 
         command = quote({
