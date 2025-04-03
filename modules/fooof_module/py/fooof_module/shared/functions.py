@@ -350,7 +350,7 @@ def tune_aperiodic_mode(filtered_freqs, filtered_powers, freq_range, max_n_peaks
         legend_title='Model Configurations',
         template='plotly_white'
     )
-    fig.show()
+    return fig
 
     if show_errors:
         # Graphs of R2 and Errors using Matplotlib

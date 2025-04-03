@@ -86,7 +86,12 @@ module_server <- function(input, output, session, ...){
 
         # Customized inputs
         window_length = input$fooof_winlen,
-        freq_range = c(1, input$fooof_freq_range)
+        freq_range = c(1, input$fooof_freq_range),
+        max_n_peaks = input$fooof_max_n_peaks,
+        aperiodic_mode = input$fooof_aperiodic_mode,
+        plt_log = input$fooof_bool,
+        freq_range_aperiodic_tuning = c(1, input$freq_range_tuning_aperiodic_mode),
+        max_n_peaks_aperiodic_tuning = input$max_n_peaks_tuning_aperiodic_mode
       )
 
       # Step 2: save user inputs to settings.yaml
@@ -221,15 +226,48 @@ module_server <- function(input, output, session, ...){
     # For debug purposes, run
     # pipeline <- raveio::pipeline("fooof_module", paths = "/Users/dipterix/Dropbox (Personal)/projects/rave-pipeline-ese2025/modules/")
     # power_outputs <- pipeline$read("power_outputs")
+    pipeline_settings <- pipeline$get_settings()
+
+    freq_range <- pipeline_settings$freq_range
+    max_n_peaks <- pipeline_settings$max_n_peaks
+    aperiodic_mode <- pipeline_settings$aperiodic_mode
+    plt_log <- pipeline_settings$plt_log
 
     shared <- pipeline$python_module(type = "shared")
     report <- reticulate::py_capture_output({
       shared$fit_fooof(
         power_outputs['filtered_frequency'],
-        power_outputs['Average Power']
+        power_outputs['Average Power'],
+        freq_range = freq_range,
+        max_n_peaks = max_n_peaks,
+        aperiodic_mode = aperiodic_mode,
+        plt_log = plt_log
       )
     })
     cat(report)
+  })
+
+  output$aperiodic_tuning_part <- shiny::renderUI({
+    shiny::validate(
+      shiny::need(
+        length(local_reactives$update_outputs) &&
+          !isFALSE(local_reactives$update_outputs),
+        message = "Please run the module first"
+      )
+    )
+
+    # retrieve the `power_outputs` from `local_data`
+    power_outputs <- local_data$power_outputs
+
+    pipeline_settings <- pipeline$get_settings()
+
+    freq_range_aperiodic_tuning <- pipeline_settings$freq_range_aperiodic_tuning
+    max_n_peaks_aperiodic_tuning <- pipeline_settings$max_n_peaks_aperiodic_tuning
+
+    shared <- pipeline$python_module(type = "shared")
+    plot <- shared$tune_aperiodic_mode(power_outputs['filtered_frequency'], power_outputs['Average Power'], freq_range_aperiodic_tuning, max_n_peaks_aperiodic_tuning, show_errors=TRUE)
+
+    return(shiny::HTML(rpymat::py_to_r(plot$to_html())))
   })
 
 }

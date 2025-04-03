@@ -1,4 +1,5 @@
-analyze_channel: 15.0
+analyze_channel: 13.0
+aperiodic_mode: fixed
 channels_to_load: 13-16,24
 condition_groupings:
   '1':
@@ -25,7 +26,13 @@ epoch_name: auditory_onset
 freq_range:
 - 1.0
 - 200.0
+freq_range_aperiodic_tuning:
+- 1.0
+- 200.0
 individual_trials: no
+max_n_peaks: 5
+max_n_peaks_aperiodic_tuning: 5
+plt_log: no
 project_name: demo
 reference_name: default
 subject_code: DemoSubject

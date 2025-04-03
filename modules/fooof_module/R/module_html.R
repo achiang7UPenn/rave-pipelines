@@ -54,6 +54,94 @@ module_html <- function(){
                     step = 0.1,
                     post = " Hz"
                   )
+                ),
+
+                shidashi::flex_break(),
+
+                shidashi::flex_item(
+                  shiny::sliderInput(
+                    inputId = ns("fooof_max_n_peaks"),
+                    label = "Maximum n peaks",
+                    min = 1,
+                    max = 15,
+                    value = 5,
+                    step = 1,
+                  )
+                ),
+
+                shidashi::flex_break(),
+
+                shidashi::flex_item(
+                  shiny::textInput(
+                    inputId = ns("fooof_aperiodic_mode"),
+                    label = "Aperiodic mode (Must enter either fixed or knee)"
+                  )
+                ),
+
+                shidashi::flex_break(),
+
+                shidashi::flex_item(
+                  shiny::checkboxInput(
+                    inputId = ns("fooof_bool"),
+                    label = "Model fit in logarithmic scale",
+                    value = FALSE
+                  )
+                )
+
+              ),
+
+              # ravedash::flex_group_box(
+              #   title = "Peak Tuning",
+              #
+              #   shidashi::flex_item(
+              #     shiny::sliderInput(
+              #       inputId = ns("freq_range_tuning_peak"),
+              #       label = "Frequency range",
+              #       min = 1,
+              #       max = 300,
+              #       value = 200,
+              #       step = 0.1,
+              #       post = " Hz"
+              #     )
+              #   ),
+              #
+              #   shidashi::flex_break(),
+              #
+              #   shidashi::flex_item(
+              #     shiny::textInput(
+              #       inputId = ns("aperiodic_mode_tuning_peak"),
+              #       label = "Aperiodic mode"
+              #     )
+              #   )
+              #
+              # ),
+
+              ravedash::flex_group_box(
+                title = "Aperiodic Mode Tuning",
+
+                shidashi::flex_item(
+                  shiny::sliderInput(
+                    inputId = ns("freq_range_tuning_aperiodic_mode"),
+                    label = "Frequency range",
+                    min = 1,
+                    max = 300,
+                    value = 200,
+                    step = 0.1,
+                    post = " Hz"
+                  )
+                ),
+
+                shidashi::flex_break(),
+
+                shidashi::flex_item(
+                  shiny::sliderInput(
+                    inputId = ns("max_n_peaks_tuning_aperiodic_mode"),
+                    label = "Maximum n peaks",
+                    min = 1,
+                    max = 15,
+                    value = 5,
+                    step = 1,
+                  )
                 )
 
               )
@@ -72,7 +160,7 @@ module_html <- function(){
 
 
             ravedash::output_card(
-              'Collapsed over frequency',
+              'Average',
               class_body = "no-padding fill-width height-450 min-height-450 resize-vertical",
               shiny::div(
                 class = 'position-relative fill',
@@ -92,7 +180,7 @@ module_html <- function(){
             ),
 
             ravedash::output_card(
-              "My output name",
+              "FOOOF Spectral Model Fit",
               class_body = "no-padding fill-width height-450 min-height-450 resize-vertical",
               shiny::div(
                 class = 'position-relative fill',
@@ -100,6 +188,16 @@ module_html <- function(){
                 shiny::verbatimTextOutput(
                   outputId = ns("fooof_print_results")
                 )
+              )
+            ),
+
+            ravedash::output_card(
+              'Aperiodic Mode Tuning',
+              class_body = "no-padding fill-width height-450 min-height-450 resize-vertical",
+              shiny::div(
+                class = 'position-relative fill',
+                shiny::uiOutput(ns("aperiodic_tuning_part"), width = '100%', height = "100%")
+                # plotly::plotlyOutput(ns("collapse_over_trial"), width = '100%', height = "100%")
               )
             )
 

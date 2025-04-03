@@ -32,9 +32,21 @@ rm(._._env_._.)
         }), deps = "settings"), input_project_name = targets::tar_target_raw("project_name", 
         quote({
             settings[["project_name"]]
+        }), deps = "settings"), input_plt_log = targets::tar_target_raw("plt_log", 
+        quote({
+            settings[["plt_log"]]
+        }), deps = "settings"), input_max_n_peaks_aperiodic_tuning = targets::tar_target_raw("max_n_peaks_aperiodic_tuning", 
+        quote({
+            settings[["max_n_peaks_aperiodic_tuning"]]
+        }), deps = "settings"), input_max_n_peaks = targets::tar_target_raw("max_n_peaks", 
+        quote({
+            settings[["max_n_peaks"]]
         }), deps = "settings"), input_individual_trials = targets::tar_target_raw("individual_trials", 
         quote({
             settings[["individual_trials"]]
+        }), deps = "settings"), input_freq_range_aperiodic_tuning = targets::tar_target_raw("freq_range_aperiodic_tuning", 
+        quote({
+            settings[["freq_range_aperiodic_tuning"]]
         }), deps = "settings"), input_freq_range = targets::tar_target_raw("freq_range", 
         quote({
             settings[["freq_range"]]
@@ -47,6 +59,9 @@ rm(._._env_._.)
         }), deps = "settings"), input_channels_to_load = targets::tar_target_raw("channels_to_load", 
         quote({
             settings[["channels_to_load"]]
+        }), deps = "settings"), input_aperiodic_mode = targets::tar_target_raw("aperiodic_mode", 
+        quote({
+            settings[["aperiodic_mode"]]
         }), deps = "settings"), input_analyze_channel = targets::tar_target_raw("analyze_channel", 
         quote({
             settings[["analyze_channel"]]
