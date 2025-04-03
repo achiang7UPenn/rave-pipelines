@@ -98,15 +98,17 @@ module_server <- function(input, output, session, ...){
       pipeline$set_settings(.list = pipeline_settings)
 
       # Step 3: run analysis to get the results
-      power_outputs <- pipeline$run(
-        names = 'power_outputs',
+      results <- pipeline$run(
+        names = c('power_outputs', 'fitted_fooof'),
 
         scheduler = "none",
         type = "vanilla"
       )
+      # env <- pipeline$eval('fitted_fooof')
 
       # Step 4: Save the results and sell outputs to update
-      local_data$power_outputs <- power_outputs
+      local_data$power_outputs <- results$power_outputs
+      local_data$fitted_fooof <- results$fitted_fooof
       local_reactives$update_outputs <- Sys.time()
 
       return()
@@ -221,31 +223,60 @@ module_server <- function(input, output, session, ...){
     )
 
     # retrieve the `power_outputs` from `local_data`
-    power_outputs <- local_data$power_outputs
+    fitted_fooof <- local_data$fitted_fooof
 
     # For debug purposes, run
-    # pipeline <- raveio::pipeline("fooof_module", paths = "/Users/dipterix/Dropbox (Personal)/projects/rave-pipeline-ese2025/modules/")
-    # power_outputs <- pipeline$read("power_outputs")
-    pipeline_settings <- pipeline$get_settings()
+    # pipeline <- raveio::pipeline("fooof_module", paths = file.path(rstudioapi::getActiveProject(), "modules/"))
+    # fitted_fooof <- pipeline$read("fitted_fooof")
 
-    freq_range <- pipeline_settings$freq_range
-    max_n_peaks <- pipeline_settings$max_n_peaks
-    aperiodic_mode <- pipeline_settings$aperiodic_mode
-    plt_log <- pipeline_settings$plt_log
+    model <- fitted_fooof$model
+    frequencies <- fitted_fooof$frequencies
+    power <- fitted_fooof$power
+    freq_range <- fitted_fooof$freq_range
+    # max_n_peaks <- fitted_fooof$max_n_peaks
+    # aperiodic_mode <- fitted_fooof$aperiodic_mode
+    # plt_log <- pipeline_settings$plt_log
+    # plt_log <- input$fooof_bool
 
-    shared <- pipeline$python_module(type = "shared")
+    # shared <- pipeline$python_module(type = "shared")
     report <- reticulate::py_capture_output({
-      shared$fit_fooof(
-        power_outputs['filtered_frequency'],
-        power_outputs['Average Power'],
-        freq_range = freq_range,
-        max_n_peaks = max_n_peaks,
-        aperiodic_mode = aperiodic_mode,
-        plt_log = plt_log
-      )
+      model$report(frequencies, power, freq_range = freq_range)
     })
     cat(report)
   })
+
+  output$fooof_plot_results <- shiny::renderImage({
+    shiny::validate(
+      shiny::need(
+        length(local_reactives$update_outputs) &&
+          !isFALSE(local_reactives$update_outputs),
+        message = "Please run the module first"
+      )
+    )
+
+    # retrieve the `power_outputs` from `local_data`
+    fitted_fooof <- local_data$fitted_fooof
+    plt_log <- !isFALSE(input$fooof_bool)
+    plt <- rpymat::import("matplotlib.pyplot", as = "plt")
+
+    # For debug purposes, run
+    # pipeline <- raveio::pipeline("fooof_module", paths = file.path(rstudioapi::getActiveProject(), "modules/"))
+    # fitted_fooof <- pipeline$read("fitted_fooof")
+
+    model <- fitted_fooof$model
+    model$plot(plt_log = plt_log)
+    plt$title(sprintf("Condition Analyzed: %s", "my condition"))
+
+    # Create a temporary file to save the plot
+    outfile <- normalizePath(tempfile(fileext = ".png"), winslash = "/", mustWork = FALSE)
+    plt$savefig(outfile)
+    plt$close()
+    list(src = outfile,
+         contentType = "image/png",
+         width = "80%",
+         height = "100%",
+         alt = "Placeholder for fooof fit plot")
+  }, deleteFile = TRUE)
 
   output$aperiodic_tuning_part <- shiny::renderUI({
     shiny::validate(

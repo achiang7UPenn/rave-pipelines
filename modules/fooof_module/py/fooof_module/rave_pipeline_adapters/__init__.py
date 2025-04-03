@@ -15,3 +15,4 @@ from .serializers import rave_serialize
 from .serializers import rave_unserialize
 
 from .pipeline_target_power_outputs import pipeline_target_power_outputs as power_outputs
+from .pipeline_target_fitted_fooof import pipeline_target_fitted_fooof as fitted_fooof

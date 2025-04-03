@@ -105,8 +105,8 @@ def generate_model_fit(filtered_freqs, filtered_powers, freq_range = [1,300], ma
   plt.show()
 
 
-def fit_fooof(filtered_freqs, filtered_powers, title = None, freq_range = [1,300],
-              max_n_peaks = 10000, aperiodic_mode = "fixed", plt_log = False):
+def fit_fooof(filtered_freqs, filtered_powers, freq_range = (0.5, 200),
+              max_n_peaks = 10000, aperiodic_mode = "fixed"):
   """
     Fits powers and frequencies using FOOOF and plots it.
 
@@ -117,14 +117,34 @@ def fit_fooof(filtered_freqs, filtered_powers, title = None, freq_range = [1,300
     Returns:
         None
   """
+  
+  if aperiodic_mode.startswith("f"):
+    aperiodic_mode = 'fixed'
+  else:
+    aperiodic_mode = 'knee'
 
   # Initialize model object
   filtered_freqs_np = np.array(filtered_freqs)
   filtered_powers_np = np.array(filtered_powers)
 
-  fm = SpectralModel(max_n_peaks = max_n_peaks, aperiodic_mode = aperiodic_mode)
-  fm.report(filtered_freqs_np, filtered_powers_np, freq_range)
-  return fm
+  fm = SpectralModel(
+    peak_width_limits = freq_range,
+    max_n_peaks = max_n_peaks, 
+    aperiodic_mode = aperiodic_mode
+  )
+  fm.fit(filtered_freqs_np, filtered_powers_np, freq_range)
+  # fm.report(filtered_freqs_np, filtered_powers_np, freq_range)
+  
+  return {
+    "model"       : fm,
+    "frequencies" : filtered_freqs_np,
+    "power"       : filtered_powers_np,
+    "freq_range"  : freq_range,
+    "max_n_peaks" : max_n_peaks,
+    "aperiodic_mode": aperiodic_mode
+  }
+  # fm.report(filtered_freqs_np, filtered_powers_np, freq_range)
+  # return fm
   # 
   # # Parameterize the power spectrum, and print out a plot
   # # plot = fm.plot(plt_log = plt_log)

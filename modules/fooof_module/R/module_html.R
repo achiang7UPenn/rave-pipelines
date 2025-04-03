@@ -72,9 +72,11 @@ module_html <- function(){
                 shidashi::flex_break(),
 
                 shidashi::flex_item(
-                  shiny::textInput(
+                  shiny::selectInput(
                     inputId = ns("fooof_aperiodic_mode"),
-                    label = "Aperiodic mode (Must enter either fixed or knee)"
+                    label = "Aperiodic mode",
+                    choices = c("fixed", "knee"),
+                    selected = "knee"
                   )
                 ),
 
@@ -179,9 +181,21 @@ module_html <- function(){
               )
             ),
 
+
+            ravedash::output_card(
+              "FOOOF Spectral Model Plot",
+              class_body = "no-padding fill-width height-450 min-height-450 resize-vertical",
+              shiny::div(
+                class = 'position-relative fill',
+
+                shiny::plotOutput(
+                  outputId = ns("fooof_plot_results")
+                )
+              )
+            ),
             ravedash::output_card(
               "FOOOF Spectral Model Fit",
-              class_body = "no-padding fill-width height-450 min-height-450 resize-vertical",
+              class_body = "no-padding fill-width height-650 min-height-450 resize-vertical",
               shiny::div(
                 class = 'position-relative fill',
 

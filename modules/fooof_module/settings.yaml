@@ -1,5 +1,5 @@
 analyze_channel: 13.0
-aperiodic_mode: fixed
+aperiodic_mode: knee
 channels_to_load: 13-16,24
 condition_groupings:
   '1':

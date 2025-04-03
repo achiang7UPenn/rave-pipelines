@@ -263,4 +263,57 @@ rm(._._env_._.)
         }), deps = c("subset_analyzed", "sample_rate", "window_length", 
         "freq_range"), cue = targets::tar_cue("thorough"), pattern = NULL, 
         iteration = "list", format = asNamespace("ravepipeline")$target_format_dynamic("user-defined-python", 
-            target_export = "power_outputs")))
+            target_export = "power_outputs")), fit_fooof_on_average = targets::tar_target_raw(name = "fitted_fooof", 
+        command = quote({
+            .py_error_handler <- function(e, use_py_last_error = TRUE) {
+                if (use_py_last_error) {
+                  e2 <- asNamespace("reticulate")$py_last_error()
+                  if (!is.null(e2)) {
+                    e <- e2
+                  }
+                }
+                code <- c("filtered_frequency = power_outputs['filtered_frequency']", 
+                "average_power = power_outputs['Average Power']", 
+                "# title = None", "# freq_range = freq_range", 
+                "# plt_log = False", "# aperiodic_mode = 'fixed'", 
+                "fitted_fooof = shared.fit_fooof(", "  filtered_freqs = filtered_frequency, ", 
+                "  filtered_powers = average_power, ", "  freq_range = freq_range,", 
+                "  max_n_peaks=max_n_peaks, ", "  aperiodic_mode=aperiodic_mode", 
+                ")")
+                stop(sprintf("Target [%s] (python) encountered the following error: \n%s\nAnalysis pipeline code:\n# ---- Target python code: %s -----\n%s\n# ---------------------------------------", 
+                  "fitted_fooof", paste(e$message, collapse = "\n"), 
+                  "fitted_fooof", paste(code, collapse = "\n")))
+            }
+            re <- tryCatch(expr = {
+                .env <- environment()
+                if (length(c("power_outputs", "max_n_peaks", 
+                "aperiodic_mode", "freq_range"))) {
+                  args <- structure(names = c("power_outputs", 
+                  "max_n_peaks", "aperiodic_mode", "freq_range"
+                  ), lapply(c("power_outputs", "max_n_peaks", 
+                  "aperiodic_mode", "freq_range"), get, envir = .env))
+                } else {
+                  args <- list()
+                }
+                module <- asNamespace("ravepipeline")$pipeline_py_module(convert = FALSE, 
+                  must_work = TRUE)
+                target_function <- module$rave_pipeline_adapters["fitted_fooof"]
+                re <- do.call(target_function, args)
+                cls <- class(re)
+                if (length(cls) && any(endsWith(cls, "rave_pipeline_adapters.RAVERuntimeException"))) {
+                  error_message <- rpymat::py_to_r(re$`__str__`())
+                  .py_error_handler(simpleError(error_message), 
+                    use_py_last_error = FALSE)
+                }
+                return(re)
+            }, python.builtin.BaseException = .py_error_handler, 
+                python.builtin.Exception = .py_error_handler, 
+                py_error = .py_error_handler, error = function(e) {
+                  traceback(e)
+                  stop(e$message, call. = FALSE)
+                })
+            return(re)
+        }), deps = c("power_outputs", "max_n_peaks", "aperiodic_mode", 
+        "freq_range"), cue = targets::tar_cue("always"), pattern = NULL, 
+        iteration = "list", format = asNamespace("ravepipeline")$target_format_dynamic("user-defined-python", 
+            target_export = "fitted_fooof")))
