@@ -251,7 +251,7 @@ def plot_trials(df, individual_trials=False):
   
     # Update layout for grid and other settings
     fig.update_layout(
-        title='Frequency vs log(Power)',
+        title='log(Power) vs Frequency',
         xaxis_title='Frequency',
         yaxis_title='log(Power)',
         showlegend=True,

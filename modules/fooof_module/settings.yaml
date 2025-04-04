@@ -33,16 +33,16 @@ condition_groupings:
     label: v
     conditions:
     - drive_v
-    - known_v
     - last_v
+    - known_v
     - meant_v
 epoch_name: auditory_onset
 freq_range:
 - 1.0
-- 200.0
+- 300.0
 freq_range_aperiodic_tuning:
 - 1.0
-- 200.0
+- 300.0
 individual_trials: no
 max_n_peaks: 5
 max_n_peaks_aperiodic_tuning: 5
