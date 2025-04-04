@@ -145,6 +145,35 @@ module_server <- function(input, output, session, ...){
       }
 
       # TODO: reset UIs to default
+      condition_groupings <- pipeline$get_settings("condition_groupings")
+      all_conditions <- unique(new_repository$epoch_table$Condition)
+      condition_groupings <- dipsaus::drop_nulls(lapply(condition_groupings, function(group) {
+        group_conditions = unlist(group$conditions)
+        group_conditions <- group_conditions[group_conditions %in% all_conditions]
+        if(!length(group_conditions)) {
+          return(NULL)
+        }
+        list(
+          group_name = group$label,
+          group_conditions = group_conditions
+        )
+      }))
+      if(length(condition_groupings)) {
+        dipsaus::updateCompoundInput2(
+          session = session,
+          inputId = "condition_groups",
+          value = condition_groupings,
+          ncomp = length(condition_groupings)
+        )
+      }
+
+      # Update window length
+      window_length <- pipeline$get_settings("window_length")
+      if(isTRUE(window_length > 0)) {
+        shiny::updateSliderInput(session = session,
+                                 inputId = "fooof_winlen",
+                                 value = window_length)
+      }
 
       # Reset preset UI & data
       component_container$reset_data()
