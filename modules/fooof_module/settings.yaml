@@ -22,6 +22,20 @@ condition_groupings:
     - meant_av
     - meant_v
     - press_AV
+  '2':
+    label: a
+    conditions:
+    - drive_a
+    - known_a
+    - last_a
+    - meant_a
+  '3':
+    label: v
+    conditions:
+    - drive_v
+    - known_v
+    - last_v
+    - meant_v
 epoch_name: auditory_onset
 freq_range:
 - 1.0

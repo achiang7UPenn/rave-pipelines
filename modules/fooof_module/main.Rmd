@@ -71,8 +71,14 @@ process_data <- function(repository, conditions_analyzed) {
   # Return the processed DataFrame
   return(subset_analyzed)
 }
-conditions_analyzed <- condition_groupings[['1']][['conditions']]
-subset_analyzed <- process_data(repository=repository, conditions_analyzed=conditions_analyzed)
+condition_keys <- names(condition_groupings)
+conditions_analyzed <- lapply(condition_keys, function(key)
+  condition_groupings[[key]][['conditions']])
+# names(conditions_analyzed) <- paste0("subset_analyzed_", condition_keys)
+# subset_analyzed <- process_data(repository=repository, conditions_analyzed=conditions_analyzed[[3]])
+subset_analyzed <- lapply(conditions_analyzed, function(conditions) {
+  process_data(repository, conditions)
+})
 
 
 ```
@@ -90,10 +96,12 @@ window_length = r.window_length
 freq_range = r.freq_range
 max_n_peaks = r.max_n_peaks
 aperiodic_mode = r.aperiodic_mode
+freq_range_aperiodic_tuning = r.freq_range_aperiodic_tuning
+max_n_peaks_aperiodic_tuning = r.max_n_peaks_aperiodic_tuning
 ```
 
 
-```{python generate_power_outputs, use_rave = TRUE, deps = c("subset_analyzed", "sample_rate", "window_length", "freq_range"), export = "power_outputs"}
+```{python generate_power_outputs, use_rave = TRUE, deps = c("subset_analyzed", "sample_rate", "window_length", "freq_range"), export = "power_outputs_list"}
 # Parameters for preprocessing (you should adjust these based on your actual requirements)
 fs = sample_rate
 
@@ -101,15 +109,24 @@ fs = sample_rate
 nperseg = sample_rate * window_length
 
 freq_range = freq_range
-
-power_outputs = shared.preprocess_powers(subset_analyzed, fs=fs, nperseg=nperseg, freq_range=freq_range)
-power_outputs = shared.add_mean_and_std(power_outputs)
+power_outputs_list = []
+for i in range(0, len(subset_analyzed)):
+  power_outputs = shared.preprocess_powers(subset_analyzed[i], fs=fs, nperseg=nperseg, freq_range=freq_range)
+  power_outputs = shared.add_mean_and_std(power_outputs)
+  power_outputs_list.append(power_outputs)
 ```
 
 
-```{python plot_trials_welch, use_rave = FALSE, deps = "power_outputs"}
+```{python extract_one_power_output, use_rave = TRUE, deps = "power_outputs_list", export = "power_outputs"}
+power_outputs = power_outputs_list[0]
+```
+
+
+
+
+```{python plot_trials_welch, use_rave = FALSE, deps = "power_outputs_list"}
 individual_trials = False
-shared.plot_trials(power_outputs, individual_trials=individual_trials)
+shared.plot_trials(power_outputs_list, individual_trials=individual_trials)
 ```
 
 
@@ -154,14 +171,12 @@ shared.tune_max_n_peaks(filtered_freqs=filtered_freqs, filtered_powers=filtered_
 
 Tuning aperiodic_mode
 
-```{python tune_aperiodic_mode, use_rave = FALSE, deps = "power_outputs"}
-filtered_freqs = power_outputs['filtered_frequency']
-filtered_powers = power_outputs['Average Power']
-freq_range = [1, 175]
-max_n_peaks=4
+```{python tune_aperiodic_mode, use_rave = FALSE, deps = "power_outputs_list"}
 
+freq_range = freq_range_aperiodic_tuning
+max_n_peaks = max_n_peaks_aperiodic_tuning
 
-shared.tune_aperiodic_mode(filtered_freqs=filtered_freqs, filtered_powers=filtered_powers, freq_range=freq_range, max_n_peaks=max_n_peaks, show_errors=True)
+shared.tune_aperiodic_mode(power_outputs_list, freq_range=freq_range, max_n_peaks=max_n_peaks, show_errors=True)
 
 ```
 

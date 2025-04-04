@@ -7,18 +7,9 @@
 from .. import shared
 from . import RAVERuntimeException
 
-def pipeline_target_power_outputs(subset_analyzed, sample_rate, window_length, freq_range):
+def pipeline_target_power_outputs(power_outputs_list):
   try:
-    # Parameters for preprocessing (you should adjust these based on your actual requirements)
-    fs = sample_rate
-    
-    # Number of timepoints = sample rate * window size in sec
-    nperseg = sample_rate * window_length
-    
-    freq_range = freq_range
-    
-    power_outputs = shared.preprocess_powers(subset_analyzed, fs=fs, nperseg=nperseg, freq_range=freq_range)
-    power_outputs = shared.add_mean_and_std(power_outputs)
+    power_outputs = power_outputs_list[0]
     return power_outputs
   except Exception as e:
     return RAVERuntimeException(e)

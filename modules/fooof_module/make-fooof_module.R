@@ -178,9 +178,13 @@ rm(._._env_._.)
                   subset_analyzed <- df_volt[c("Time", dimnames(sub_volt)$Trial)]
                   return(subset_analyzed)
                 }
-                conditions_analyzed <- condition_groupings[["1"]][["conditions"]]
-                subset_analyzed <- process_data(repository = repository, 
-                  conditions_analyzed = conditions_analyzed)
+                condition_keys <- names(condition_groupings)
+                conditions_analyzed <- lapply(condition_keys, 
+                  function(key) condition_groupings[[key]][["conditions"]])
+                subset_analyzed <- lapply(conditions_analyzed, 
+                  function(conditions) {
+                    process_data(repository, conditions)
+                  })
             })
             tryCatch({
                 eval(.__target_expr__.)
@@ -204,15 +208,19 @@ rm(._._env_._.)
                     subset_analyzed <- df_volt[c("Time", dimnames(sub_volt)$Trial)]
                     return(subset_analyzed)
                   }
-                  conditions_analyzed <- condition_groupings[["1"]][["conditions"]]
-                  subset_analyzed <- process_data(repository = repository, 
-                    conditions_analyzed = conditions_analyzed)
+                  condition_keys <- names(condition_groupings)
+                  conditions_analyzed <- lapply(condition_keys, 
+                    function(key) condition_groupings[[key]][["conditions"]])
+                  subset_analyzed <- lapply(conditions_analyzed, 
+                    function(conditions) {
+                      process_data(repository, conditions)
+                    })
                 }
                 subset_analyzed
             }), target_depends = c("repository", "condition_groupings"
             )), deps = c("repository", "condition_groupings"), 
         cue = targets::tar_cue("thorough"), pattern = NULL, iteration = "list"), 
-    generate_power_outputs = targets::tar_target_raw(name = "power_outputs", 
+    generate_power_outputs = targets::tar_target_raw(name = "power_outputs_list", 
         command = quote({
             .py_error_handler <- function(e, use_py_last_error = TRUE) {
                 if (use_py_last_error) {
@@ -224,12 +232,13 @@ rm(._._env_._.)
                 code <- c("# Parameters for preprocessing (you should adjust these based on your actual requirements)", 
                 "fs = sample_rate", "", "# Number of timepoints = sample rate * window size in sec", 
                 "nperseg = sample_rate * window_length", "", 
-                "freq_range = freq_range", "", "power_outputs = shared.preprocess_powers(subset_analyzed, fs=fs, nperseg=nperseg, freq_range=freq_range)", 
-                "power_outputs = shared.add_mean_and_std(power_outputs)"
-                )
+                "freq_range = freq_range", "power_outputs_list = []", 
+                "for i in range(0, len(subset_analyzed)):", "  power_outputs = shared.preprocess_powers(subset_analyzed[i], fs=fs, nperseg=nperseg, freq_range=freq_range)", 
+                "  power_outputs = shared.add_mean_and_std(power_outputs)", 
+                "  power_outputs_list.append(power_outputs)")
                 stop(sprintf("Target [%s] (python) encountered the following error: \n%s\nAnalysis pipeline code:\n# ---- Target python code: %s -----\n%s\n# ---------------------------------------", 
-                  "power_outputs", paste(e$message, collapse = "\n"), 
-                  "power_outputs", paste(code, collapse = "\n")))
+                  "power_outputs_list", paste(e$message, collapse = "\n"), 
+                  "power_outputs_list", paste(code, collapse = "\n")))
             }
             re <- tryCatch(expr = {
                 .env <- environment()
@@ -239,6 +248,49 @@ rm(._._env_._.)
                   "sample_rate", "window_length", "freq_range"
                   ), lapply(c("subset_analyzed", "sample_rate", 
                   "window_length", "freq_range"), get, envir = .env))
+                } else {
+                  args <- list()
+                }
+                module <- asNamespace("ravepipeline")$pipeline_py_module(convert = FALSE, 
+                  must_work = TRUE)
+                target_function <- module$rave_pipeline_adapters["power_outputs_list"]
+                re <- do.call(target_function, args)
+                cls <- class(re)
+                if (length(cls) && any(endsWith(cls, "rave_pipeline_adapters.RAVERuntimeException"))) {
+                  error_message <- rpymat::py_to_r(re$`__str__`())
+                  .py_error_handler(simpleError(error_message), 
+                    use_py_last_error = FALSE)
+                }
+                return(re)
+            }, python.builtin.BaseException = .py_error_handler, 
+                python.builtin.Exception = .py_error_handler, 
+                py_error = .py_error_handler, error = function(e) {
+                  traceback(e)
+                  stop(e$message, call. = FALSE)
+                })
+            return(re)
+        }), deps = c("subset_analyzed", "sample_rate", "window_length", 
+        "freq_range"), cue = targets::tar_cue("thorough"), pattern = NULL, 
+        iteration = "list", format = asNamespace("ravepipeline")$target_format_dynamic("user-defined-python", 
+            target_export = "power_outputs_list")), extract_one_power_output = targets::tar_target_raw(name = "power_outputs", 
+        command = quote({
+            .py_error_handler <- function(e, use_py_last_error = TRUE) {
+                if (use_py_last_error) {
+                  e2 <- asNamespace("reticulate")$py_last_error()
+                  if (!is.null(e2)) {
+                    e <- e2
+                  }
+                }
+                code <- "power_outputs = power_outputs_list[0]"
+                stop(sprintf("Target [%s] (python) encountered the following error: \n%s\nAnalysis pipeline code:\n# ---- Target python code: %s -----\n%s\n# ---------------------------------------", 
+                  "power_outputs", paste(e$message, collapse = "\n"), 
+                  "power_outputs", paste(code, collapse = "\n")))
+            }
+            re <- tryCatch(expr = {
+                .env <- environment()
+                if (length("power_outputs_list")) {
+                  args <- structure(names = "power_outputs_list", 
+                    lapply("power_outputs_list", get, envir = .env))
                 } else {
                   args <- list()
                 }
@@ -260,9 +312,8 @@ rm(._._env_._.)
                   stop(e$message, call. = FALSE)
                 })
             return(re)
-        }), deps = c("subset_analyzed", "sample_rate", "window_length", 
-        "freq_range"), cue = targets::tar_cue("thorough"), pattern = NULL, 
-        iteration = "list", format = asNamespace("ravepipeline")$target_format_dynamic("user-defined-python", 
+        }), deps = "power_outputs_list", cue = targets::tar_cue("thorough"), 
+        pattern = NULL, iteration = "list", format = asNamespace("ravepipeline")$target_format_dynamic("user-defined-python", 
             target_export = "power_outputs")), fit_fooof_on_average = targets::tar_target_raw(name = "fitted_fooof", 
         command = quote({
             .py_error_handler <- function(e, use_py_last_error = TRUE) {

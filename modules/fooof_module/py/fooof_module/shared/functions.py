@@ -217,37 +217,38 @@ def add_mean_and_std(df, mean_col_name="Average Power", std_col_name="StdDev"):
     return df
 
 def plot_trials(df, individual_trials=False):
-
     fig = go.Figure()
-
-    # Add the first trace (filt_powers electrode_14_avg)
-    fig.add_trace(go.Scatter(
-        x=df['filtered_frequency'],
-        y=np.log10(df['Average Power']),
-        mode='lines',
-        name='Average Power'
-    ))
-
-    # Add the second trace (filt_powers electrode_14_std)
-    fig.add_trace(go.Scatter(
-        x=df['filtered_frequency'],
-        y=np.log10(df['StdDev']),
-        mode='lines',
-        name='Standard Deviation'
-    ))
-
-    if individual_trials:
-        # Plot each column except 'filtered_frequency', 'Average Power', and 'StdDev'
-        for col in df.columns:
-            if col not in ['filtered_frequency', 'Average Power', 'StdDev']:
-                fig.add_trace(go.Scatter(
-                    x=df['filtered_frequency'],
-                    y=df[col],
-                    mode='lines',
-                    name=col
-                ))
-
-
+    for i in range(0, len(df)):
+      dataframe = df[i]
+      
+      # Add the first trace (filt_powers electrode_14_avg)
+      fig.add_trace(go.Scatter(
+          x=dataframe['filtered_frequency'],
+          y=np.log10(dataframe['Average Power']),
+          mode='lines',
+          name=f'Average Power Condition {i+1}'
+      ))
+  
+      # Add the second trace (filt_powers electrode_14_std)
+      fig.add_trace(go.Scatter(
+          x=dataframe['filtered_frequency'],
+          y=np.log10(dataframe['StdDev']),
+          mode='lines',
+          name=f'Standard Deviation Condition {i+1}'
+      ))
+  
+      if individual_trials:
+          # Plot each column except 'filtered_frequency', 'Average Power', and 'StdDev'
+          for col in dataframe.columns:
+              if col not in ['filtered_frequency', 'Average Power', 'StdDev']:
+                  fig.add_trace(go.Scatter(
+                      x=dataframe['filtered_frequency'],
+                      y=np.log(dataframe[col]),
+                      mode='lines',
+                      name=col
+                  ))
+  
+  
     # Update layout for grid and other settings
     fig.update_layout(
         title='Frequency vs log(Power)',
@@ -258,7 +259,7 @@ def plot_trials(df, individual_trials=False):
         xaxis=dict(showgrid=True),
         yaxis=dict(showgrid=True)
     )
-
+  
     # Show the figure
     return fig
     
@@ -329,66 +330,69 @@ def tune_max_n_peaks(filtered_freqs, filtered_powers, freq_range, aperiodic_mode
 
 
 # Tune aperiodic_mode
-def tune_aperiodic_mode(filtered_freqs, filtered_powers, freq_range, max_n_peaks, show_errors=True):
-    # Initialize storage
-    r2s = []
-    errors = []
-
-    # Initialize the Plotly figure
-    fig = go.Figure()
-    
-    filtered_freqs_np = np.array(filtered_freqs)
-    filtered_powers_np = np.array(filtered_powers)
-
-    # Define the aperiodic modes to loop over
-    aperiodic_modes = ['fixed', 'knee']
-
-    # Loop through aperiodic modes and fit models
-    for aperiodic_mode in aperiodic_modes:
-        nm = SpectralModel(max_n_peaks=max_n_peaks, aperiodic_mode=aperiodic_mode)
-        nm.fit(filtered_freqs_np, filtered_powers_np, freq_range=freq_range)
-
-        # Append metrics
-        r2s.append(nm.r_squared_)
-        errors.append(nm.error_)
-
-        # Get the model fit and add it as a trace
-        model_freqs, model_fit = nm.freqs, nm.get_model()
-        fig.add_trace(go.Scatter(x=model_freqs, y=model_fit,
-                                 mode='lines',
-                                 name=f'{aperiodic_mode} (R²={nm.r_squared_:.2f})'))
-
-    # Add the original data as a baseline (optional)
-    fig.add_trace(go.Scatter(x=nm.freqs, y=nm.get_data(),
-                             mode='lines', name='Original Spectrum',
-                             line=dict(color='black', dash='dash')))
+def tune_aperiodic_mode(df, freq_range, max_n_peaks, show_errors=True):
+  fig = go.Figure()
+  for i in range(0, len(df)):
+      # Initialize storage
+      dataframe = df[i]
+      r2s = []
+      errors = []
+  
+      # Initialize the Plotly figure
+      # fig = go.Figure()
+      
+      filtered_freqs_np = np.array(dataframe['filtered_frequency'])
+      filtered_powers_np = np.array(dataframe['Average Power'])
+  
+      # Define the aperiodic modes to loop over
+      aperiodic_modes = ['fixed', 'knee']
+  
+      # Loop through aperiodic modes and fit models
+      for aperiodic_mode in aperiodic_modes:
+          nm = SpectralModel(max_n_peaks=max_n_peaks, aperiodic_mode=aperiodic_mode)
+          nm.fit(filtered_freqs_np, filtered_powers_np, freq_range=freq_range)
+  
+          # Append metrics
+          r2s.append(nm.r_squared_)
+          errors.append(nm.error_)
+  
+          # Get the model fit and add it as a trace
+          model_freqs, model_fit = nm.freqs, nm.get_model()
+          fig.add_trace(go.Scatter(x=model_freqs, y=model_fit,
+                                   mode='lines',
+                                   name=f'{aperiodic_mode} (R²={nm.r_squared_:.2f}) - Condition {i+1}'))
+  
+      # Add the original data as a baseline (optional)
+      fig.add_trace(go.Scatter(x=nm.freqs, y=nm.get_data(),
+                               mode='lines', name=f'Original Spectrum - Condition {i+1}',
+                               line=dict(color='black', dash='dash')))
     # Customize the layout
-    fig.update_layout(
-        title='Spectral Model Fits for Different Aperiodic Modes',
-        xaxis_title='Frequency (Hz)',
-        yaxis_title='Power',
-        legend_title='Model Configurations',
-        template='plotly_white'
-    )
-    return fig
+  fig.update_layout(
+      title='Spectral Model Fits for Different Aperiodic Modes',
+      xaxis_title='Frequency (Hz)',
+      yaxis_title='Power',
+      legend_title='Model Configurations',
+      template='plotly_white'
+  )
+  return fig
 
-    if show_errors:
-        # Graphs of R2 and Errors using Matplotlib
-        fig, axs = plt.subplots(1, 2, figsize=(16, 5))
-        modes_labels = [f'{mode} mode' for mode in aperiodic_modes]
-        
-        axs[0].plot(modes_labels, r2s, "bo-")
-        axs[0].set_title("R² vs. Aperiodic Mode")
-        axs[0].set_ylabel("R²")
-        axs[0].set_xlabel("Aperiodic Mode")
+  if show_errors:
+      # Graphs of R2 and Errors using Matplotlib
+      fig, axs = plt.subplots(1, 2, figsize=(16, 5))
+      modes_labels = [f'{mode} mode' for mode in aperiodic_modes]
+      
+      axs[0].plot(modes_labels, r2s, "bo-")
+      axs[0].set_title("R² vs. Aperiodic Mode")
+      axs[0].set_ylabel("R²")
+      axs[0].set_xlabel("Aperiodic Mode")
 
-        axs[1].plot(modes_labels, errors, "ro-")
-        axs[1].set_title("MSE vs. Aperiodic Mode")
-        axs[1].set_ylabel("MSE")
-        axs[1].set_xlabel("Aperiodic Mode")
+      axs[1].plot(modes_labels, errors, "ro-")
+      axs[1].set_title("MSE vs. Aperiodic Mode")
+      axs[1].set_ylabel("MSE")
+      axs[1].set_xlabel("Aperiodic Mode")
 
-        plt.tight_layout()
-        plt.show()
+      plt.tight_layout()
+      plt.show()
         
         
         

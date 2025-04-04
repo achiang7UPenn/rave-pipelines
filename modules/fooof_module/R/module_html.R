@@ -48,7 +48,7 @@ module_html <- function(){
                   shiny::sliderInput(
                     inputId = ns("fooof_freq_range"),
                     label = "Frequency range",
-                    min = 1,
+                    min = 2,
                     max = 300,
                     value = 200,
                     step = 0.1,
@@ -124,8 +124,8 @@ module_html <- function(){
                 shidashi::flex_item(
                   shiny::sliderInput(
                     inputId = ns("freq_range_tuning_aperiodic_mode"),
-                    label = "Frequency range",
-                    min = 1,
+                    label = "Frequency range (Tune anything below the frequency range under Fooof Parameters)",
+                    min = 2,
                     max = 300,
                     value = 200,
                     step = 0.1,

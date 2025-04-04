@@ -1,4 +1,3 @@
-
 module_server <- function(input, output, session, ...){
 
 
@@ -99,7 +98,7 @@ module_server <- function(input, output, session, ...){
 
       # Step 3: run analysis to get the results
       results <- pipeline$run(
-        names = c('power_outputs', 'fitted_fooof'),
+        names = c('power_outputs', 'fitted_fooof', "power_outputs_list"),
 
         scheduler = "none",
         type = "vanilla"
@@ -109,6 +108,7 @@ module_server <- function(input, output, session, ...){
       # Step 4: Save the results and sell outputs to update
       local_data$power_outputs <- results$power_outputs
       local_data$fitted_fooof <- results$fitted_fooof
+      local_data$power_outputs_list <- results$power_outputs_list
       local_reactives$update_outputs <- Sys.time()
 
       return()
@@ -173,6 +173,7 @@ module_server <- function(input, output, session, ...){
 
     # retrieve the `power_outputs` from `local_data`
     power_outputs <- local_data$power_outputs
+    power_outputs_list <- local_data$power_outputs_list
 
     # For debug purposes, run
     # pipeline <- raveio::pipeline("fooof_module", paths = "/Users/dipterix/Dropbox (Personal)/projects/rave-pipeline-ese2025/modules/")
@@ -182,7 +183,7 @@ module_server <- function(input, output, session, ...){
     # shared.plot_trials(power_outputs, individual_trials=individual_trials)
 
     shared <- pipeline$python_module(type = "shared")
-    plot <- shared$plot_trials(power_outputs, individual_trials = FALSE)
+    plot <- shared$plot_trials(power_outputs_list, individual_trials = FALSE)
 
     return(shiny::HTML(rpymat::py_to_r(plot$to_html())))
   })
@@ -198,6 +199,7 @@ module_server <- function(input, output, session, ...){
 
     # retrieve the `power_outputs` from `local_data`
     power_outputs <- local_data$power_outputs
+    power_outputs_list <- local_data$power_outputs_list
 
     # For debug purposes, run
     # pipeline <- raveio::pipeline("fooof_module", paths = "/Users/dipterix/Dropbox (Personal)/projects/rave-pipeline-ese2025/modules/")
@@ -207,7 +209,7 @@ module_server <- function(input, output, session, ...){
     # shared.plot_trials(power_outputs, individual_trials=individual_trials)
 
     shared <- pipeline$python_module(type = "shared")
-    plot <- shared$plot_trials(power_outputs, individual_trials = TRUE)
+    plot <- shared$plot_trials(power_outputs_list, individual_trials = TRUE)
 
     return(shiny::HTML(rpymat::py_to_r(plot$to_html())))
   })
@@ -289,6 +291,7 @@ module_server <- function(input, output, session, ...){
 
     # retrieve the `power_outputs` from `local_data`
     power_outputs <- local_data$power_outputs
+    power_outputs_list <- local_data$power_outputs_list
 
     pipeline_settings <- pipeline$get_settings()
 
@@ -296,7 +299,7 @@ module_server <- function(input, output, session, ...){
     max_n_peaks_aperiodic_tuning <- pipeline_settings$max_n_peaks_aperiodic_tuning
 
     shared <- pipeline$python_module(type = "shared")
-    plot <- shared$tune_aperiodic_mode(power_outputs['filtered_frequency'], power_outputs['Average Power'], freq_range_aperiodic_tuning, max_n_peaks_aperiodic_tuning, show_errors=TRUE)
+    plot <- shared$tune_aperiodic_mode(power_outputs_list, freq_range_aperiodic_tuning, max_n_peaks_aperiodic_tuning, show_errors=TRUE)
 
     return(shiny::HTML(rpymat::py_to_r(plot$to_html())))
   })
