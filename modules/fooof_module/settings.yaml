@@ -1,5 +1,5 @@
 analyze_channel: 13.0
-aperiodic_mode: knee
+aperiodic_mode: fixed
 channels_to_load: 13-16,24
 condition_groupings:
   '1':
@@ -23,29 +23,29 @@ condition_groupings:
     - meant_v
     - press_AV
   '2':
-    label: a
-    conditions:
-    - drive_a
-    - known_a
-    - last_a
-    - meant_a
-  '3':
     label: v
     conditions:
-    - drive_v
     - last_v
+    - drive_v
     - known_v
     - meant_v
+  '3':
+    label: a
+    conditions:
+    - last_a
+    - drive_a
+    - known_a
+    - meant_a
 epoch_name: auditory_onset
 freq_range:
 - 1.0
-- 300.0
+- 200.0
 freq_range_aperiodic_tuning:
 - 1.0
-- 300.0
+- 130.8
 individual_trials: no
 max_n_peaks: 5
-max_n_peaks_aperiodic_tuning: 5
+max_n_peaks_aperiodic_tuning: 3
 plt_log: no
 project_name: demo
 reference_name: default

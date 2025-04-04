@@ -105,7 +105,7 @@ def generate_model_fit(filtered_freqs, filtered_powers, freq_range = [1,300], ma
   plt.show()
 
 
-def fit_fooof(filtered_freqs, filtered_powers, freq_range = (0.5, 200),
+def fit_fooof(power_outputs_list, freq_range = [1, 175],
               max_n_peaks = 10000, aperiodic_mode = "fixed"):
   """
     Fits powers and frequencies using FOOOF and plots it.
@@ -117,32 +117,39 @@ def fit_fooof(filtered_freqs, filtered_powers, freq_range = (0.5, 200),
     Returns:
         None
   """
+  fooof_fits = []
   
   if aperiodic_mode.startswith("f"):
     aperiodic_mode = 'fixed'
   else:
     aperiodic_mode = 'knee'
-
-  # Initialize model object
-  filtered_freqs_np = np.array(filtered_freqs)
-  filtered_powers_np = np.array(filtered_powers)
-
-  fm = SpectralModel(
-    peak_width_limits = freq_range,
-    max_n_peaks = max_n_peaks, 
-    aperiodic_mode = aperiodic_mode
-  )
-  fm.fit(filtered_freqs_np, filtered_powers_np, freq_range)
-  # fm.report(filtered_freqs_np, filtered_powers_np, freq_range)
+    
+  for power_outputs in power_outputs_list:
+    
+    # Initialize model object
+    filtered_freqs = power_outputs['filtered_frequency']
+    filtered_powers = power_outputs['Average Power']
+    filtered_freqs_np = np.array(filtered_freqs)
+    filtered_powers_np = np.array(filtered_powers)
   
-  return {
-    "model"       : fm,
-    "frequencies" : filtered_freqs_np,
-    "power"       : filtered_powers_np,
-    "freq_range"  : freq_range,
-    "max_n_peaks" : max_n_peaks,
-    "aperiodic_mode": aperiodic_mode
-  }
+    fm = SpectralModel(
+      peak_width_limits = freq_range,
+      max_n_peaks = max_n_peaks, 
+      aperiodic_mode = aperiodic_mode
+    )
+    fm.fit(filtered_freqs_np, filtered_powers_np, freq_range)
+  # fm.report(filtered_freqs_np, filtered_powers_np, freq_range)
+    fooof_fit = {
+      "model"       : fm,
+      "frequencies" : filtered_freqs_np,
+      "power"       : filtered_powers_np,
+      "freq_range"  : freq_range,
+      "max_n_peaks" : max_n_peaks,
+      "aperiodic_mode": aperiodic_mode
+    }
+    fooof_fits.append(fooof_fit)
+  
+  return fooof_fits
   # fm.report(filtered_freqs_np, filtered_powers_np, freq_range)
   # return fm
   # 
