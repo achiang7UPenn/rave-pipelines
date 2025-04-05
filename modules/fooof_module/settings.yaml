@@ -23,29 +23,27 @@ condition_groupings:
     - meant_v
     - press_AV
   '2':
-    label: v
+    label: www
     conditions:
-    - last_v
-    - drive_v
-    - known_v
+    - AknownVmeant
+    - known_a
     - meant_v
   '3':
-    label: a
+    label: wwwwwwww
     conditions:
-    - last_a
-    - drive_a
-    - known_a
     - meant_a
+    - known_av
+    - AmeantVdrive
 epoch_name: auditory_onset
 freq_range:
 - 1.0
-- 200.0
+- 56.6
 freq_range_aperiodic_tuning:
-- 1.0
-- 130.8
+- 1
+- 300
 individual_trials: no
-max_n_peaks: 5
-max_n_peaks_aperiodic_tuning: 3
+max_n_peaks: 3
+max_n_peaks_aperiodic_tuning: 15
 plt_log: no
 project_name: demo
 reference_name: default

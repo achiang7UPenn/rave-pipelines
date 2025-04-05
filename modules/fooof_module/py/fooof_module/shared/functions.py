@@ -105,7 +105,7 @@ def generate_model_fit(filtered_freqs, filtered_powers, freq_range = [1,300], ma
   plt.show()
 
 
-def fit_fooof(power_outputs_list, freq_range = [1, 175],
+def fit_fooof(filtered_freqs, filtered_powers, freq_range = [1, 175],
               max_n_peaks = 10000, aperiodic_mode = "fixed"):
   """
     Fits powers and frequencies using FOOOF and plots it.
@@ -117,39 +117,29 @@ def fit_fooof(power_outputs_list, freq_range = [1, 175],
     Returns:
         None
   """
-  fooof_fits = []
+
   
   if aperiodic_mode.startswith("f"):
     aperiodic_mode = 'fixed'
   else:
     aperiodic_mode = 'knee'
-    
-  for power_outputs in power_outputs_list:
-    
-    # Initialize model object
-    filtered_freqs = power_outputs['filtered_frequency']
-    filtered_powers = power_outputs['Average Power']
-    filtered_freqs_np = np.array(filtered_freqs)
-    filtered_powers_np = np.array(filtered_powers)
   
-    fm = SpectralModel(
-      peak_width_limits = freq_range,
-      max_n_peaks = max_n_peaks, 
-      aperiodic_mode = aperiodic_mode
-    )
-    fm.fit(filtered_freqs_np, filtered_powers_np, freq_range)
+  filtered_freqs_np = np.array(filtered_freqs)
+  filtered_powers_np = np.array(filtered_powers)
+  
+  fm = SpectralModel(peak_width_limits = freq_range, max_n_peaks = max_n_peaks, aperiodic_mode = aperiodic_mode)
+  fm.fit(filtered_freqs_np, filtered_powers_np, freq_range)
   # fm.report(filtered_freqs_np, filtered_powers_np, freq_range)
-    fooof_fit = {
-      "model"       : fm,
-      "frequencies" : filtered_freqs_np,
-      "power"       : filtered_powers_np,
-      "freq_range"  : freq_range,
-      "max_n_peaks" : max_n_peaks,
-      "aperiodic_mode": aperiodic_mode
-    }
-    fooof_fits.append(fooof_fit)
+  fooof_fit = {
+    "model"       : fm,
+    "frequencies" : filtered_freqs_np,
+    "power"       : filtered_powers_np,
+    "freq_range"  : freq_range,
+    "max_n_peaks" : max_n_peaks,
+    "aperiodic_mode": aperiodic_mode
+  }
   
-  return fooof_fits
+  return fooof_fit
   # fm.report(filtered_freqs_np, filtered_powers_np, freq_range)
   # return fm
   # 
@@ -356,8 +346,8 @@ def tune_aperiodic_mode(df, freq_range, max_n_peaks, show_errors=True):
   
       # Loop through aperiodic modes and fit models
       for aperiodic_mode in aperiodic_modes:
-          nm = SpectralModel(max_n_peaks=max_n_peaks, aperiodic_mode=aperiodic_mode)
-          nm.fit(filtered_freqs_np, filtered_powers_np, freq_range=freq_range)
+          nm = SpectralModel(peak_width_limits=freq_range, max_n_peaks=max_n_peaks, aperiodic_mode=aperiodic_mode)
+          nm.fit(filtered_freqs_np, filtered_powers_np, freq_range)
   
           # Append metrics
           r2s.append(nm.r_squared_)
@@ -495,3 +485,54 @@ def preprocess_powers(subset_analyzed, fs=2000, nperseg=4000, freq_range=[1, 175
 
     return power_outputs
 
+def plot_fooof_fits(df, freq_range, max_n_peaks, aperiodic_mode, plt_log=False):
+  fig = go.Figure()
+  for i in range(0, len(df)):
+      # Initialize storage
+      dataframe = df[i]
+      
+      filtered_freqs_np = np.array(dataframe['filtered_frequency'])
+      filtered_powers_np = np.array(dataframe['Average Power'])
+  
+      fm = SpectralModel(peak_width_limits=freq_range, max_n_peaks=max_n_peaks, aperiodic_mode=aperiodic_mode)
+      fm.fit(filtered_freqs_np, filtered_powers_np, freq_range)
+
+      # Get the model fit and add it as a trace
+      model_freqs, model_fit, aperiodic_fit = fm.freqs, fm.get_model(), fm._ap_fit
+      x_freqs = np.log10(model_freqs) if plt_log else model_freqs
+
+      fig.add_trace(go.Scatter(x=x_freqs, y=model_fit,
+                               mode='lines',
+                               name=f'Full Model Fit - Condition {i+1}',
+                               line=dict(color='red')))
+                               
+      fig.add_trace(go.Scatter(x=x_freqs, y=aperiodic_fit,
+                               mode='lines',
+                               name=f'Aperiodic Fit - Condition {i+1}',
+                               line=dict(color='blue', dash='dash')))
+  
+      # Add the original data as a baseline
+      fig.add_trace(go.Scatter(x=x_freqs, y=fm.get_data(),
+                               mode='lines', 
+                               name=f'Original Spectrum - Condition {i+1}',
+                               line=dict(color='black')))
+    # Customize the layout
+  fig.update_layout(
+      xaxis_title='log(Frequency)' if plt_log else 'Frequency',
+      yaxis_title='Power',
+      template='plotly_white'
+  )
+  return fig
+
+def new_fit_fooof(df, freq_range = [1,300],
+               max_n_peaks = 10000, aperiodic_mode = "fixed", plt_log = False):
+
+   # Initialize model object
+   for i in range(0, len(df)):
+     dataframe = df[i]
+     filtered_freqs_np = np.array(dataframe['filtered_frequency'])
+     filtered_powers_np = np.array(dataframe['Average Power'])
+   
+     fm = SpectralModel(peak_width_limits=freq_range, max_n_peaks = max_n_peaks, aperiodic_mode = aperiodic_mode)
+     print(f"--- Report - Condition {i+1} ---")
+     fm.report(filtered_freqs_np, filtered_powers_np, freq_range)

@@ -148,6 +148,21 @@ fitted_fooof = shared.fit_fooof(
 )
 ```
 
+```{python plot_fooof_fit, use_rave = FALSE, deps = c("power_outputs_list", "max_n_peaks", "aperiodic_mode", "freq_range")}
+# title = None
+freq_range = freq_range
+max_n_peaks=max_n_peaks
+plt_log = True
+aperiodic_mode = aperiodic_mode
+shared.plot_fooof_fits(
+  power_outputs_list,
+  freq_range,
+  max_n_peaks, 
+  aperiodic_mode,
+  plt_log=plt_log
+)
+```
+
 
 Tuning coming next!!!
 

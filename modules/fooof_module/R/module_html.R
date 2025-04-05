@@ -48,9 +48,9 @@ module_html <- function(){
                   shiny::sliderInput(
                     inputId = ns("fooof_freq_range"),
                     label = "Frequency range",
-                    min = 2,
+                    min = 1,
                     max = 300,
-                    value = 200,
+                    value = c(30, 200),
                     step = 0.1,
                     post = " Hz"
                   )
@@ -124,10 +124,10 @@ module_html <- function(){
                 shidashi::flex_item(
                   shiny::sliderInput(
                     inputId = ns("freq_range_tuning_aperiodic_mode"),
-                    label = "Frequency range (Tune anything below the frequency range under Fooof Parameters)",
-                    min = 2,
+                    label = "Frequency range",
+                    min = 1,
                     max = 300,
-                    value = 200,
+                    value = c(30, 200),
                     step = 0.1,
                     post = " Hz"
                   )
@@ -182,19 +182,30 @@ module_html <- function(){
             ),
 
 
+            # ravedash::output_card(
+            #   "FOOOF Spectral Model Plot",
+            #   class_body = "no-padding fill-width height-450 min-height-450 resize-vertical",
+            #   shiny::div(
+            #     class = 'position-relative fill',
+            #
+            #     shiny::plotOutput(
+            #       outputId = ns("fooof_plot_results")
+            #     )
+            #   )
+            # ),
+
             ravedash::output_card(
-              "FOOOF Spectral Model Plot",
+              "Fooof Fits Plot",
               class_body = "no-padding fill-width height-450 min-height-450 resize-vertical",
               shiny::div(
                 class = 'position-relative fill',
 
-                shiny::plotOutput(
-                  outputId = ns("fooof_plot_results")
-                )
+                shiny::uiOutput(ns("fooof_plot_results_testing"), width="100%'", height="100%")
               )
             ),
+
             ravedash::output_card(
-              "FOOOF Spectral Model Fit",
+              "Fooof Spectral Model Fit",
               class_body = "no-padding fill-width height-650 min-height-450 resize-vertical",
               shiny::div(
                 class = 'position-relative fill',
