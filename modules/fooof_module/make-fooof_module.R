@@ -323,25 +323,22 @@ rm(._._env_._.)
                     e <- e2
                   }
                 }
-                code <- c("filtered_frequency = power_outputs['filtered_frequency']", 
-                "average_power = power_outputs['Average Power']", 
-                "# title = None", "# freq_range = freq_range", 
+                code <- c("", "", "# title = None", "# freq_range = freq_range", 
                 "# plt_log = False", "# aperiodic_mode = 'fixed'", 
-                "fitted_fooof = shared.fit_fooof(", "  filtered_freqs = filtered_frequency, ", 
-                "  filtered_powers = average_power, ", "  freq_range = freq_range,", 
-                "  max_n_peaks=max_n_peaks, ", "  aperiodic_mode=aperiodic_mode", 
-                ")")
+                "fitted_fooof = shared.fit_fooof(", "  power_outputs_list = power_outputs_list,", 
+                "  freq_range = freq_range,", "  max_n_peaks=max_n_peaks, ", 
+                "  aperiodic_mode=aperiodic_mode", ")")
                 stop(sprintf("Target [%s] (python) encountered the following error: \n%s\nAnalysis pipeline code:\n# ---- Target python code: %s -----\n%s\n# ---------------------------------------", 
                   "fitted_fooof", paste(e$message, collapse = "\n"), 
                   "fitted_fooof", paste(code, collapse = "\n")))
             }
             re <- tryCatch(expr = {
                 .env <- environment()
-                if (length(c("power_outputs", "max_n_peaks", 
+                if (length(c("power_outputs_list", "max_n_peaks", 
                 "aperiodic_mode", "freq_range"))) {
-                  args <- structure(names = c("power_outputs", 
+                  args <- structure(names = c("power_outputs_list", 
                   "max_n_peaks", "aperiodic_mode", "freq_range"
-                  ), lapply(c("power_outputs", "max_n_peaks", 
+                  ), lapply(c("power_outputs_list", "max_n_peaks", 
                   "aperiodic_mode", "freq_range"), get, envir = .env))
                 } else {
                   args <- list()
@@ -364,7 +361,7 @@ rm(._._env_._.)
                   stop(e$message, call. = FALSE)
                 })
             return(re)
-        }), deps = c("power_outputs", "max_n_peaks", "aperiodic_mode", 
-        "freq_range"), cue = targets::tar_cue("always"), pattern = NULL, 
+        }), deps = c("power_outputs_list", "max_n_peaks", "aperiodic_mode", 
+        "freq_range"), cue = targets::tar_cue("thorough"), pattern = NULL, 
         iteration = "list", format = asNamespace("ravepipeline")$target_format_dynamic("user-defined-python", 
             target_export = "fitted_fooof")))

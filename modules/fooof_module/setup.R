@@ -9,7 +9,7 @@ ravedash::debug_modules()
 pipeline <- raveio::pipeline("fooof_module", paths = file.path(rstudioapi::getActiveProject(), "modules"))
 pipeline$visualize()
 
-power_outputs <- pipeline$run("power_outputs")
+fitted_fooof <- pipeline$run("fitted_fooof")
 
 
 repository <- pipeline$run("repository")
