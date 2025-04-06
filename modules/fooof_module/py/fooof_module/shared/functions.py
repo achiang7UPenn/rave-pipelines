@@ -271,19 +271,20 @@ def plot_raw_data(data, fs):
   plt.show()
 
 
-def tune_max_n_peaks(filtered_freqs, filtered_powers, freq_range, aperiodic_mode, peaks_range, show_errors=True):
-  # Initialize storage
-  r2s = []
-  errors = []
-
-  # Initialize the Plotly figure
+def tune_max_n_peaks(df, freq_range, aperiodic_mode, peaks_range, show_errors=True):
   fig = go.Figure()
+  error_figs_base64 = []
   
-  filtered_freqs_np = np.array(filtered_freqs)
-  filtered_powers_np = np.array(filtered_powers)
-
-  # Loop through peak values and fit models
-  for max_n_peaks in peaks_range:
+  for i in range(0, len(df)):
+    dataframe = df[i]
+    r2s = []
+    errors = []
+    filtered_freqs_np = np.array(dataframe['filtered_frequency'])
+    filtered_powers_np = np.array(dataframe['Average Power'])
+    
+    
+    # Loop through peak values and fit models
+    for max_n_peaks in peaks_range:
       nm = SpectralModel(max_n_peaks=max_n_peaks, aperiodic_mode='fixed')
       nm.fit(filtered_freqs_np, filtered_powers_np, freq_range=freq_range)
 
@@ -295,13 +296,41 @@ def tune_max_n_peaks(filtered_freqs, filtered_powers, freq_range, aperiodic_mode
       model_freqs, model_fit = nm.freqs, nm.get_model()
       fig.add_trace(go.Scatter(x=model_freqs, y=model_fit,
                               mode='lines',
-                              name=f'{max_n_peaks} peaks (R²={nm.r_squared_:.2f})'))
+                              name=f'{max_n_peaks} peaks (R²={nm.r_squared_:.2f}) - Condition{i+1}'))
       
 
-  # Add the original data as a baseline (optional)
-  fig.add_trace(go.Scatter(x=nm.freqs, y=nm.get_data(),
-                          mode='lines', name='Original Spectrum',
-                          line=dict(color='black', dash='dash')))
+    fig.add_trace(go.Scatter(x=nm.freqs, y=nm.get_data(),
+                            mode='lines', name=f'Original Spectrum - Condition{i+1}',
+                            line=dict(color='black', dash='dash')))
+                            
+    if show_errors:
+      fig_r2, ax_r2 = plt.subplots()
+      ax_r2.plot(peaks_range, r2s, "bo-")
+      ax_r2.set_title(f"R² - Condition {i+1}")
+      ax_r2.set_ylabel("R²")
+      ax_r2.set_xlabel("Number of Peaks")
+      plt.tight_layout()
+      
+      buf_r2 = BytesIO()
+      fig_r2.savefig(buf_r2, format='png')
+      buf_r2.seek(0)
+      error_figs_base64.append(base64.b64encode(buf_r2.read()).decode('utf-8'))
+      buf_r2.close()
+      plt.close(fig_r2)
+      
+      fig_err, ax_err = plt.subplots()
+      ax_err.plot(peaks_range, errors, "ro-")
+      ax_err.set_title(f"MSE - Condition {i+1}")
+      ax_err.set_ylabel("MSE")
+      ax_err.set_xlabel("Number of Peaks")
+      plt.tight_layout()
+
+      buf_err = BytesIO()
+      fig_err.savefig(buf_err, format='png')
+      buf_err.seek(0)
+      error_figs_base64.append(base64.b64encode(buf_err.read()).decode('utf-8'))
+      buf_err.close()
+      plt.close(fig_err)
 
   # Customize the layout
   fig.update_layout(
@@ -311,23 +340,10 @@ def tune_max_n_peaks(filtered_freqs, filtered_powers, freq_range, aperiodic_mode
       legend_title='Model',
       template='plotly_white'
   )
-  fig.show()
+  
+  return {'plotly': fig, 'matplotlib': error_figs_base64}
 
 
-  if show_errors:
-    # Graphs of R2 and Errors
-    fig, axs = plt.subplots(1, 2, figsize = (16, 5))
-    axs[0].plot(peaks_range, r2s, "bo-")
-    axs[0].set_title("R2 vs. Number of Peaks")
-    axs[0].set_ylabel("R2")
-    axs[0].set_xlabel("Number of Peaks")
-
-    axs[1].plot(peaks_range, errors, "ro-")
-    axs[1].set_title("MSE vs. Number of Peaks")
-    axs[1].set_ylabel("MSE")
-    axs[1].set_xlabel("Number of Peaks")
-    
-    plt.show()
 
 def tune_aperiodic_mode(df, freq_range, max_n_peaks, show_errors=True):
     fig = go.Figure()

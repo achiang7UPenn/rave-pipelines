@@ -50,7 +50,7 @@ module_html <- function(){
                     label = "Frequency range",
                     min = 1,
                     max = 300,
-                    value = c(30, 200),
+                    value = c(1, 300),
                     step = 0.1,
                     post = " Hz"
                   )
@@ -92,31 +92,45 @@ module_html <- function(){
 
               ),
 
-              # ravedash::flex_group_box(
-              #   title = "Peak Tuning",
-              #
-              #   shidashi::flex_item(
-              #     shiny::sliderInput(
-              #       inputId = ns("freq_range_tuning_peak"),
-              #       label = "Frequency range",
-              #       min = 1,
-              #       max = 300,
-              #       value = 200,
-              #       step = 0.1,
-              #       post = " Hz"
-              #     )
-              #   ),
-              #
-              #   shidashi::flex_break(),
-              #
-              #   shidashi::flex_item(
-              #     shiny::textInput(
-              #       inputId = ns("aperiodic_mode_tuning_peak"),
-              #       label = "Aperiodic mode"
-              #     )
-              #   )
-              #
-              # ),
+              ravedash::flex_group_box(
+                title = "Max n Peaks Tuning",
+
+                shidashi::flex_item(
+                  shiny::sliderInput(
+                    inputId = ns("freq_range_tuning_max_n_peaks"),
+                    label = "Frequency range",
+                    min = 1,
+                    max = 300,
+                    value = c(1, 300),
+                    step = 0.1,
+                    post = "Hz"
+                  )
+                ),
+
+                shidashi::flex_break(),
+
+                shidashi::flex_item(
+                  shiny::selectInput(
+                    inputId = ns("aperiodic_mode_tuning_max_n_peaks"),
+                    label = "Aperiodic mode",
+                    choices = c("fixed", "knee"),
+                    selected = "knee"
+                  )
+                ),
+
+                shidashi::flex_break(),
+
+                shidashi::flex_item(
+                  shiny::sliderInput(
+                    inputId = ns("peaks_range_tuning_max_n_peaks"),
+                    label = "Peaks range",
+                    min = 1,
+                    max = 50,
+                    value = c(1, 15),
+                    step = 1,
+                  )
+                )
+              ),
 
               ravedash::flex_group_box(
                 title = "Aperiodic Mode Tuning",
@@ -127,9 +141,9 @@ module_html <- function(){
                     label = "Frequency range",
                     min = 1,
                     max = 300,
-                    value = c(30, 200),
+                    value = c(1, 300),
                     step = 0.1,
-                    post = " Hz"
+                    post = "Hz"
                   )
                 ),
 
@@ -143,6 +157,73 @@ module_html <- function(){
                     max = 15,
                     value = 5,
                     step = 1,
+                  )
+                )
+
+              ),
+
+              ravedash::flex_group_box(
+                title = "Peak Threshold Tuning",
+
+                shidashi::flex_item(
+                  shiny::sliderInput(
+                    inputId = ns("freq_range_tuning_peak_threshold"),
+                    label = "Frequency range",
+                    min = 1,
+                    max = 300,
+                    value = c(1, 300),
+                    step = 0.1,
+                    post = "Hz"
+                  )
+                ),
+
+                shidashi::flex_break(),
+
+                shidashi::flex_item(
+                  shiny::sliderInput(
+                    inputId = ns("max_n_peaks_tuning_peak_threshold"),
+                    label = "Maximum n peaks",
+                    min = 1,
+                    max = 15,
+                    value = 5,
+                    step = 1,
+                  )
+                ),
+
+                shidashi::flex_break(),
+
+                shidashi::flex_item(
+                  shiny::selectInput(
+                    inputId = ns("aperiodic_mode_tuning_peak_threshold"),
+                    label = "Aperiodic mode",
+                    choices = c("fixed", "knee"),
+                    selected = "knee"
+                  )
+                ),
+
+                shidashi::flex_break(),
+
+                shidashi::flex_item(
+                  shiny::sliderInput(
+                    inputId = ns("threshold_value_range_tuning_peak_threshold"),
+                    label = "Peak threshold value",
+                    min = 0.1,
+                    max = 10,
+                    value = c(1,10),
+                    step = 0.1
+                  )
+                ),
+
+                shidashi::flex_break(),
+
+                shidashi::flex_item(
+                  shiny::sliderInput(
+                    inputId = ns("number_of_threshold_value_tuning_peak_threshold"),
+                    label = "Number of peak threshold to be generated",
+                    min = 1,
+                    max = 500,
+                    value = 5,
+                    step = 1
                   )
                 )
 

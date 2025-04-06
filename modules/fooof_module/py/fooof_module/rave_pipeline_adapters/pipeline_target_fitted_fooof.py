@@ -7,16 +7,17 @@
 from .. import shared
 from . import RAVERuntimeException
 
-def pipeline_target_fitted_fooof(power_outputs_list, max_n_peaks, aperiodic_mode, freq_range):
+def pipeline_target_fitted_fooof(power_outputs, max_n_peaks, aperiodic_mode, freq_range):
   try:
-    
-    
+    filtered_frequency = power_outputs['filtered_frequency']
+    average_power = power_outputs['Average Power']
     # title = None
     # freq_range = freq_range
     # plt_log = False
     # aperiodic_mode = 'fixed'
     fitted_fooof = shared.fit_fooof(
-      power_outputs_list = power_outputs_list,
+      filtered_freqs = filtered_frequency, 
+      filtered_powers = average_power, 
       freq_range = freq_range,
       max_n_peaks=max_n_peaks, 
       aperiodic_mode=aperiodic_mode

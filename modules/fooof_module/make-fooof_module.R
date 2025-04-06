@@ -35,6 +35,9 @@ rm(._._env_._.)
         }), deps = "settings"), input_plt_log = targets::tar_target_raw("plt_log", 
         quote({
             settings[["plt_log"]]
+        }), deps = "settings"), input_peaks_range_tuning_max_n_peaks = targets::tar_target_raw("peaks_range_tuning_max_n_peaks", 
+        quote({
+            settings[["peaks_range_tuning_max_n_peaks"]]
         }), deps = "settings"), input_max_n_peaks_aperiodic_tuning = targets::tar_target_raw("max_n_peaks_aperiodic_tuning", 
         quote({
             settings[["max_n_peaks_aperiodic_tuning"]]
@@ -44,6 +47,9 @@ rm(._._env_._.)
         }), deps = "settings"), input_individual_trials = targets::tar_target_raw("individual_trials", 
         quote({
             settings[["individual_trials"]]
+        }), deps = "settings"), input_freq_range_tuning_max_n_peaks = targets::tar_target_raw("freq_range_tuning_max_n_peaks", 
+        quote({
+            settings[["freq_range_tuning_max_n_peaks"]]
         }), deps = "settings"), input_freq_range_aperiodic_tuning = targets::tar_target_raw("freq_range_aperiodic_tuning", 
         quote({
             settings[["freq_range_aperiodic_tuning"]]
@@ -59,6 +65,9 @@ rm(._._env_._.)
         }), deps = "settings"), input_channels_to_load = targets::tar_target_raw("channels_to_load", 
         quote({
             settings[["channels_to_load"]]
+        }), deps = "settings"), input_aperiodic_mode_tuning_max_n_peaks = targets::tar_target_raw("aperiodic_mode_tuning_max_n_peaks", 
+        quote({
+            settings[["aperiodic_mode_tuning_max_n_peaks"]]
         }), deps = "settings"), input_aperiodic_mode = targets::tar_target_raw("aperiodic_mode", 
         quote({
             settings[["aperiodic_mode"]]
@@ -323,22 +332,25 @@ rm(._._env_._.)
                     e <- e2
                   }
                 }
-                code <- c("", "", "# title = None", "# freq_range = freq_range", 
+                code <- c("filtered_frequency = power_outputs['filtered_frequency']", 
+                "average_power = power_outputs['Average Power']", 
+                "# title = None", "# freq_range = freq_range", 
                 "# plt_log = False", "# aperiodic_mode = 'fixed'", 
-                "fitted_fooof = shared.fit_fooof(", "  power_outputs_list = power_outputs_list,", 
-                "  freq_range = freq_range,", "  max_n_peaks=max_n_peaks, ", 
-                "  aperiodic_mode=aperiodic_mode", ")")
+                "fitted_fooof = shared.fit_fooof(", "  filtered_freqs = filtered_frequency, ", 
+                "  filtered_powers = average_power, ", "  freq_range = freq_range,", 
+                "  max_n_peaks=max_n_peaks, ", "  aperiodic_mode=aperiodic_mode", 
+                ")")
                 stop(sprintf("Target [%s] (python) encountered the following error: \n%s\nAnalysis pipeline code:\n# ---- Target python code: %s -----\n%s\n# ---------------------------------------", 
                   "fitted_fooof", paste(e$message, collapse = "\n"), 
                   "fitted_fooof", paste(code, collapse = "\n")))
             }
             re <- tryCatch(expr = {
                 .env <- environment()
-                if (length(c("power_outputs_list", "max_n_peaks", 
+                if (length(c("power_outputs", "max_n_peaks", 
                 "aperiodic_mode", "freq_range"))) {
-                  args <- structure(names = c("power_outputs_list", 
+                  args <- structure(names = c("power_outputs", 
                   "max_n_peaks", "aperiodic_mode", "freq_range"
-                  ), lapply(c("power_outputs_list", "max_n_peaks", 
+                  ), lapply(c("power_outputs", "max_n_peaks", 
                   "aperiodic_mode", "freq_range"), get, envir = .env))
                 } else {
                   args <- list()
@@ -361,7 +373,7 @@ rm(._._env_._.)
                   stop(e$message, call. = FALSE)
                 })
             return(re)
-        }), deps = c("power_outputs_list", "max_n_peaks", "aperiodic_mode", 
-        "freq_range"), cue = targets::tar_cue("thorough"), pattern = NULL, 
+        }), deps = c("power_outputs", "max_n_peaks", "aperiodic_mode", 
+        "freq_range"), cue = targets::tar_cue("always"), pattern = NULL, 
         iteration = "list", format = asNamespace("ravepipeline")$target_format_dynamic("user-defined-python", 
             target_export = "fitted_fooof")))

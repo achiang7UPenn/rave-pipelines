@@ -98,6 +98,12 @@ max_n_peaks = r.max_n_peaks
 aperiodic_mode = r.aperiodic_mode
 freq_range_aperiodic_tuning = r.freq_range_aperiodic_tuning
 max_n_peaks_aperiodic_tuning = r.max_n_peaks_aperiodic_tuning
+freq_range_tuning_max_n_peaks = r.freq_range_tuning_max_n_peaks
+aperiodic_mode_tuning_max_n_peaks = r.aperiodic_mode_tuning_max_n_peaks
+peaks_range_tuning_max_n_peaks = r. peaks_range_tuning_max_n_peaks
+freq_range_tuning_peak_threshold = r.freq_range_tuning_peak_threshold
+max_n_peaks_tuning_peak_threshold = r.max_n_peaks_tuning_peak_threshold
+aperiodic_mode_tuning_peak_threshold = r.aperiodic_mode_tuning_peak_threshold
 ```
 
 
@@ -132,20 +138,22 @@ shared.plot_trials(power_outputs_list, individual_trials=individual_trials)
 
 
 
-```{python fit_fooof_on_average, use_rave = TRUE, deps = c("power_outputs_list", "max_n_peaks", "aperiodic_mode", "freq_range"), export = "fitted_fooof"}
-
-
+```{python fit_fooof_on_average, use_rave = TRUE, deps = c("power_outputs", "max_n_peaks", "aperiodic_mode", "freq_range"), export = "fitted_fooof", cue = "always"}
+filtered_frequency = power_outputs['filtered_frequency']
+average_power = power_outputs['Average Power']
 # title = None
 # freq_range = freq_range
 # plt_log = False
 # aperiodic_mode = 'fixed'
 fitted_fooof = shared.fit_fooof(
-  power_outputs_list = power_outputs_list,
+  filtered_freqs = filtered_frequency, 
+  filtered_powers = average_power, 
   freq_range = freq_range,
   max_n_peaks=max_n_peaks, 
   aperiodic_mode=aperiodic_mode
 )
 ```
+
 
 ```{python plot_fooof_fit, use_rave = FALSE, deps = c("power_outputs_list", "max_n_peaks", "aperiodic_mode", "freq_range")}
 # title = None
@@ -167,25 +175,19 @@ Tuning coming next!!!
 
 Tuning max_n_peaks
 
-```{python tune_max_n_peaks, use_rave = FALSE, deps = "power_outputs"}
-freq_range = [1, 175]
-aperiodic_mode='fixed'
-peaks_range = shared.np.arange(9)
+```{python tune_max_n_peaks, use_rave = FALSE, deps = c("power_outputs_list", "freq_range_tuning_max_n_peaks", "aperiodic_mode_tuning_max_n_peaks", "peaks_range_tuning_max_n_peaks")}
+freq_range = freq_range_tuning_max_n_peaks
+aperiodic_mode=aperiodic_mode_tuning_max_n_peaks
+peaks_range = peaks_range_tuning_max_n_peaks
 
-
-filtered_freqs = power_outputs['filtered_frequency']
-filtered_powers = power_outputs['Average Power']
-
-
-shared.tune_max_n_peaks(filtered_freqs=filtered_freqs, filtered_powers=filtered_powers, freq_range=freq_range, aperiodic_mode=aperiodic_mode, peaks_range=peaks_range)
-
+shared.tune_max_n_peaks(power_outputs_list, freq_range=freq_range, aperiodic_mode=aperiodic_mode, peaks_range=peaks_range)
 ```
 
 
 
 Tuning aperiodic_mode
 
-```{python tune_aperiodic_mode, use_rave = FALSE, deps = "power_outputs_list"}
+```{python tune_aperiodic_mode, use_rave = FALSE, deps = c("power_outputs_list", "freq_range_aperiodic_tuning", "max_n_peaks_aperiodic_tuning")}
 
 freq_range = freq_range_aperiodic_tuning
 max_n_peaks = max_n_peaks_aperiodic_tuning

@@ -90,7 +90,30 @@ module_server <- function(input, output, session, ...){
         aperiodic_mode = input$fooof_aperiodic_mode,
         plt_log = input$fooof_bool,
         freq_range_aperiodic_tuning = input$freq_range_tuning_aperiodic_mode,
-        max_n_peaks_aperiodic_tuning = input$max_n_peaks_tuning_aperiodic_mode
+        max_n_peaks_aperiodic_tuning = input$max_n_peaks_tuning_aperiodic_mode,
+        freq_range_tuning_max_n_peaks = input$freq_range_tuning_max_n_peaks,
+        aperiodic_mode_tuning_max_n_peaks = input$aperiodic_mode_tuning_max_n_peaks,
+        peaks_range_tuning_max_n_peaks = seq(input$peaks_range_tuning_max_n_peaks[1], input$peaks_range_tuning_max_n_peaks[2]),
+        freq_range_tuning_peak_threshold = input$freq_range_tuning_peak_threshold,
+        max_n_peaks_tuning_peak_threshold = input$max_n_peaks_tuning_peak_threshold,
+        aperiodic_mode_tuning_peak_threshold = input$aperiodic_mode_tuning_peak_threshold,
+        threshold_value_range_tuning_peak_threshold = input$threshold_value_range_tuning_peak_threshold,
+        number_of_threshold_value_tuning_peak_threshold = input$number_of_threshold_value_tuning_peak_threshold
+        # start = input$threshold_value_range_tuning_peak_threshold[1],
+        # stop = input$threshold_value_range_tuning_peak_threshold[2],
+        # num = input$number_of_threshold_value_tuning_peak_threshold,
+        # value_list = numeric(num),
+        # for (i in 1:num) {
+        #   value_list[i] = 10 * ((start + i * (stop - start)) / (num - 1))
+        # }
+
+        # # Initialize an empty list to store the values
+        # value_list <- numeric(num)
+        #
+        # # Calculate the values based on the formula
+        # for (i in 1:num) {
+        #   value_list[i] <- 10 * ((start + i * (stop - start)) / (num - 1))
+        # }
       )
 
       # Step 2: save user inputs to settings.yaml
@@ -189,8 +212,8 @@ module_server <- function(input, output, session, ...){
     ignoreInit = FALSE
   )
 
-  # Register outputs
-  # output$collapse_over_trial <- shiny::renderUI({
+
+  # Output for plotting average spectral power
   output$collapse_over_trial <- shiny::renderUI({
     shiny::validate(
       shiny::need(
@@ -217,6 +240,7 @@ module_server <- function(input, output, session, ...){
     return(shiny::HTML(rpymat::py_to_r(plot$to_html())))
   })
 
+  # Output for plotting individual trials
   output$individual_trials_plot <- shiny::renderUI({
     shiny::validate(
       shiny::need(
@@ -243,7 +267,7 @@ module_server <- function(input, output, session, ...){
     return(shiny::HTML(rpymat::py_to_r(plot$to_html())))
   })
 
-
+  # Output for reports
   output$fooof_print_results <- shiny::renderPrint({
     shiny::validate(
       shiny::need(
@@ -332,6 +356,9 @@ module_server <- function(input, output, session, ...){
   #
   #   return(shiny::HTML(rpymat::py_to_r(plot$to_html())))
   # })
+
+
+  # Output for aperiodic tuning
   output$aperiodic_tuning_part <- shiny::renderUI({
     shiny::validate(
       shiny::need(
@@ -367,7 +394,7 @@ module_server <- function(input, output, session, ...){
       htmltools::tags$div(
         style = "border: 2px solid #ddd; border-radius: 8px; padding: 15px; margin-top: 20px; background-color: #fafafa;",
         htmltools::tags$div(
-          style = "font-weight: bold; margin-bottom: 10px;",
+          style = "font-weight: bold; margin-bottom: 11px;",
           paste("Error Plots - Condition", (i + 1) %/% 2)
         ),
         htmltools::tags$div(
@@ -388,7 +415,64 @@ module_server <- function(input, output, session, ...){
     )
   })
 
+  # Output for max_n_peaks tuning
+  output$max_n_peaks_tuning_part <- shiny::renderUI({
+    shiny::validate(
+      shiny::need(
+        length(local_reactives$update_outputs) &&
+          !isFALSE(local_reactives$update_outputs),
+        message = "Please run the module first"
+      )
+    )
 
+    power_outputs_list <- local_data$power_outputs_list
+    pipeline_settings <- pipeline$get_settings()
+
+    freq_range_tuning_max_n_peaks <- pipeline_settings$freq_range_tuning_max_n_peaks
+    aperiodic_mode_tuning_max_n_peaks <- pipeline_settings$aperiodic_mode_tuning_max_n_peaks
+    peaks_range_tuning_max_n_peaks <- pipeline_settings$peaks_range_tuning_max_n_peaks
+    freq_range <- pipeline_settings$freq_range
+    max_n_peaks <- pipeline_settings$max_n_peaks
+
+
+    shared <- pipeline$python_module(type = "shared")
+    result <- rpymat::py_to_r(shared$tune_max_n_peaks(
+      power_outputs_list,
+      freq_range_tuning_max_n_peaks,
+      aperiodic_mode_tuning_max_n_peaks,
+      peaks_range_tuning_max_n_peaks,
+      show_errors = TRUE
+    ))
+
+    plotly_html <- htmltools::HTML(rpymat::py_to_r(result$plotly$to_html()))
+    matplotlib_imgs <- result$matplotlib
+
+    # Group into condition boxes (2 images per condition)
+    condition_boxes <- lapply(seq(1, length(matplotlib_imgs), by = 2), function(i) {
+      row_imgs <- matplotlib_imgs[i:min(i+1, length(matplotlib_imgs))]
+      htmltools::tags$div(
+        style = "border: 2px solid #ddd; border-radius: 8px; padding: 15px; margin-top: 20px; background-color: #fafafa;",
+        htmltools::tags$div(
+          style = "font-weight: bold; margin-bottom: 11px;",
+          paste("Error Plots - Condition", (i + 1) %/% 2)
+        ),
+        htmltools::tags$div(
+          style = "display: flex; justify-content: space-around; flex-wrap: wrap;",
+          lapply(row_imgs, function(base64_img) {
+            htmltools::tags$img(
+              src = paste0("data:image/png;base64,", base64_img),
+              style = "width: 48%; height: auto;"
+            )
+          })
+        )
+      )
+    })
+
+    htmltools::tagList(
+      plotly_html,
+      condition_boxes
+    )
+  })
 
 
 
