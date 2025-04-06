@@ -101,6 +101,7 @@ loader_server <- function(input, output, session, ...){
       default_epoch <- isTRUE(loader_epoch$get_sub_element_input("default"))
       default_reference <- isTRUE(loader_epoch$get_sub_element_input("default"))
 
+
       # --------------------- Run the pipeline! ---------------------
 
       # Calculate the progress bar

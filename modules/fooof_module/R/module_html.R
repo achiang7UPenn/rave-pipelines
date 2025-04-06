@@ -217,11 +217,31 @@ module_html <- function(){
             ),
 
             ravedash::output_card(
+              'Max n Peaks Tuning',
+              class_body = "no-padding fill-width height-450 min-height-450 resize-vertical",
+              shiny::div(
+                class = 'position-relative fill',
+                shiny::uiOutput(ns("max_n_peaks_tuning_part"), width = '100%', height = "100%")
+                # plotly::plotlyOutput(ns("collapse_over_trial"), width = '100%', height = "100%")
+              )
+            ),
+
+            ravedash::output_card(
               'Aperiodic Mode Tuning',
               class_body = "no-padding fill-width height-450 min-height-450 resize-vertical",
               shiny::div(
                 class = 'position-relative fill',
                 shiny::uiOutput(ns("aperiodic_tuning_part"), width = '100%', height = "100%")
+                # plotly::plotlyOutput(ns("collapse_over_trial"), width = '100%', height = "100%")
+              )
+            ),
+
+            ravedash::output_card(
+              'Peak Threshold Tuning',
+              class_body = "no-padding fill-width height-450 min-height-450 resize-vertical",
+              shiny::div(
+                class = 'position-relative fill',
+                shiny::uiOutput(ns("peak_threshold_tuning_part"), width = '100%', height = "100%")
                 # plotly::plotlyOutput(ns("collapse_over_trial"), width = '100%', height = "100%")
               )
             )
