@@ -210,7 +210,7 @@ module_html <- function(){
                     min = 0.1,
                     max = 10,
                     value = c(1,10),
-                    step = 0.1
+                    step = 0.1,
                   )
                 ),
 
@@ -219,10 +219,10 @@ module_html <- function(){
                 shidashi::flex_item(
                   shiny::sliderInput(
                     inputId = ns("number_of_threshold_value_tuning_peak_threshold"),
-                    label = "Number of peak threshold to be generated",
+                    label = "Number of peak thresholds to be generated",
                     min = 1,
-                    max = 500,
-                    value = 5,
+                    max = 100,
+                    value = 100,
                     step = 1
                   )
                 )

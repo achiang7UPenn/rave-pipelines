@@ -29,7 +29,7 @@ condition_groupings:
     conditions:
     - AdriveVlast
   '3':
-    label: Testing again
+    label: Testing Again
     conditions:
     - drive_a
 epoch_name: auditory_onset
@@ -49,7 +49,7 @@ individual_trials: no
 max_n_peaks: 5
 max_n_peaks_aperiodic_tuning: 5
 max_n_peaks_tuning_peak_threshold: 5
-number_of_threshold_value_tuning_peak_threshold: 5
+number_of_threshold_value_tuning_peak_threshold: 100
 peaks_range_tuning_max_n_peaks:
 - 1
 - 2

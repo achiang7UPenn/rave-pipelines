@@ -104,6 +104,8 @@ peaks_range_tuning_max_n_peaks = r. peaks_range_tuning_max_n_peaks
 freq_range_tuning_peak_threshold = r.freq_range_tuning_peak_threshold
 max_n_peaks_tuning_peak_threshold = r.max_n_peaks_tuning_peak_threshold
 aperiodic_mode_tuning_peak_threshold = r.aperiodic_mode_tuning_peak_threshold
+threshold_value_range_tuning_peak_threshold = r.threshold_value_range_tuning_peak_threshold
+number_of_threshold_value_tuning_peak_threshold = r.number_of_threshold_value_tuning_peak_threshold
 ```
 
 
@@ -200,16 +202,15 @@ shared.tune_aperiodic_mode(power_outputs_list, freq_range=freq_range, max_n_peak
 
 Tuning peak_threshold
 
-```{python tune_peak_threshold, use_rave = FALSE, deps = "power_outputs"}
-freq_range = [1, 175]
-max_n_peaks=4
-aperiodic_mode="knee"
-peak_threshold_range = shared.np.logspace(start = 0, stop = 1, num = 100)
+```{python tune_peak_threshold, use_rave = FALSE, deps = c("power_outputs_list", "freq_range_tuning_peak_threshold", "max_n_peaks_tuning_peak_threshold", "aperiodic_mode_tuning_peak_threshold", "threshold_value_range_tuning_peak_threshold", "number_of_threshold_value_tuning_peak_threshold")}
+freq_range=freq_range_tuning_peak_threshold
+max_n_peaks=max_n_peaks_tuning_peak_threshold
+aperiodic_mode=aperiodic_mode_tuning_peak_threshold
+start1=threshold_value_range_tuning_peak_threshold[0]
+stop1=threshold_value_range_tuning_peak_threshold[1]
+num1=number_of_threshold_value_tuning_peak_threshold
 
-filtered_freqs = power_outputs['filtered_frequency']
-filtered_powers = power_outputs['Average Power']
-
-shared.tune_peak_threshold(filtered_freqs=filtered_freqs, filtered_powers=filtered_powers, freq_range=freq_range, max_n_peaks=max_n_peaks, aperiodic_mode=aperiodic_mode, peak_threshold_range=peak_threshold_range, show_errors=True)
+shared.tune_peak_threshold(power_outputs_list, freq_range=freq_range, max_n_peaks=max_n_peaks, aperiodic_mode=aperiodic_mode, start1=start1, stop1=stop1, num1=num1, show_errors=True)
 
 ```
 

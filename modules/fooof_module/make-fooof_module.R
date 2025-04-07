@@ -23,6 +23,9 @@ rm(._._env_._.)
         }), deps = "settings"), input_time_window_to_load = targets::tar_target_raw("time_window_to_load", 
         quote({
             settings[["time_window_to_load"]]
+        }), deps = "settings"), input_threshold_value_range_tuning_peak_threshold = targets::tar_target_raw("threshold_value_range_tuning_peak_threshold", 
+        quote({
+            settings[["threshold_value_range_tuning_peak_threshold"]]
         }), deps = "settings"), input_subject_code = targets::tar_target_raw("subject_code", 
         quote({
             settings[["subject_code"]]
@@ -38,6 +41,12 @@ rm(._._env_._.)
         }), deps = "settings"), input_peaks_range_tuning_max_n_peaks = targets::tar_target_raw("peaks_range_tuning_max_n_peaks", 
         quote({
             settings[["peaks_range_tuning_max_n_peaks"]]
+        }), deps = "settings"), input_number_of_threshold_value_tuning_peak_threshold = targets::tar_target_raw("number_of_threshold_value_tuning_peak_threshold", 
+        quote({
+            settings[["number_of_threshold_value_tuning_peak_threshold"]]
+        }), deps = "settings"), input_max_n_peaks_tuning_peak_threshold = targets::tar_target_raw("max_n_peaks_tuning_peak_threshold", 
+        quote({
+            settings[["max_n_peaks_tuning_peak_threshold"]]
         }), deps = "settings"), input_max_n_peaks_aperiodic_tuning = targets::tar_target_raw("max_n_peaks_aperiodic_tuning", 
         quote({
             settings[["max_n_peaks_aperiodic_tuning"]]
@@ -47,6 +56,9 @@ rm(._._env_._.)
         }), deps = "settings"), input_individual_trials = targets::tar_target_raw("individual_trials", 
         quote({
             settings[["individual_trials"]]
+        }), deps = "settings"), input_freq_range_tuning_peak_threshold = targets::tar_target_raw("freq_range_tuning_peak_threshold", 
+        quote({
+            settings[["freq_range_tuning_peak_threshold"]]
         }), deps = "settings"), input_freq_range_tuning_max_n_peaks = targets::tar_target_raw("freq_range_tuning_max_n_peaks", 
         quote({
             settings[["freq_range_tuning_max_n_peaks"]]
@@ -65,6 +77,9 @@ rm(._._env_._.)
         }), deps = "settings"), input_channels_to_load = targets::tar_target_raw("channels_to_load", 
         quote({
             settings[["channels_to_load"]]
+        }), deps = "settings"), input_aperiodic_mode_tuning_peak_threshold = targets::tar_target_raw("aperiodic_mode_tuning_peak_threshold", 
+        quote({
+            settings[["aperiodic_mode_tuning_peak_threshold"]]
         }), deps = "settings"), input_aperiodic_mode_tuning_max_n_peaks = targets::tar_target_raw("aperiodic_mode_tuning_max_n_peaks", 
         quote({
             settings[["aperiodic_mode_tuning_max_n_peaks"]]

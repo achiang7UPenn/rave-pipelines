@@ -274,6 +274,7 @@ def plot_raw_data(data, fs):
 def tune_max_n_peaks(df, freq_range, aperiodic_mode, peaks_range, show_errors=True):
   fig = go.Figure()
   error_figs_base64 = []
+  failed_conditions = []
   
   for i in range(0, len(df)):
     dataframe = df[i]
@@ -281,22 +282,28 @@ def tune_max_n_peaks(df, freq_range, aperiodic_mode, peaks_range, show_errors=Tr
     errors = []
     filtered_freqs_np = np.array(dataframe['filtered_frequency'])
     filtered_powers_np = np.array(dataframe['Average Power'])
-    
+    #model_fail = None
     
     # Loop through peak values and fit models
     for max_n_peaks in peaks_range:
-      nm = SpectralModel(max_n_peaks=max_n_peaks, aperiodic_mode='fixed')
-      nm.fit(filtered_freqs_np, filtered_powers_np, freq_range=freq_range)
-
-      # Append metrics
-      r2s.append(nm.r_squared_)
-      errors.append(nm.error_)
-
-      # Get the model fit and add it as a trace
-      model_freqs, model_fit = nm.freqs, nm.get_model()
-      fig.add_trace(go.Scatter(x=model_freqs, y=model_fit,
-                              mode='lines',
-                              name=f'{max_n_peaks} peaks (R²={nm.r_squared_:.2f}) - Condition{i+1}'))
+      nm = SpectralModel(peak_width_limits=freq_range, max_n_peaks=max_n_peaks, aperiodic_mode=aperiodic_mode)
+      try:
+        nm.fit(filtered_freqs_np, filtered_powers_np, freq_range=freq_range)
+        #model_fail = None
+  
+        # Append metrics
+        r2s.append(nm.r_squared_)
+        errors.append(nm.error_)
+  
+        # Get the model fit and add it as a trace
+        model_freqs, model_fit = nm.freqs, nm.get_model()
+        fig.add_trace(go.Scatter(x=model_freqs, y=model_fit,
+                                mode='lines',
+                                name=f'{max_n_peaks} peaks (R²={nm.r_squared_:.2f}) - Condition{i+1}'))
+      except Exception as e:
+        #model_fail = "Model fitting failed. Please choose your settings again."
+        if i + 1 not in failed_conditions:
+          failed_conditions.append(i + 1)
       
 
     fig.add_trace(go.Scatter(x=nm.freqs, y=nm.get_data(),
@@ -340,15 +347,20 @@ def tune_max_n_peaks(df, freq_range, aperiodic_mode, peaks_range, show_errors=Tr
       legend_title='Model',
       template='plotly_white'
   )
+
+  model_fail_message = None
+  if failed_conditions:
+      model_fail_message = f"Model fitting failed for condition(s): {', '.join(map(str, failed_conditions))}. Please adjust the max n peaks tuning parameter(s)."
   
-  return {'plotly': fig, 'matplotlib': error_figs_base64}
+  return {'plotly': fig, 'matplotlib': error_figs_base64, 'model_fail': model_fail_message}
 
 
 
 def tune_aperiodic_mode(df, freq_range, max_n_peaks, show_errors=True):
     fig = go.Figure()
     aperiodic_modes = ['fixed', 'knee']
-    error_figs_base64 = []  # list of base64-encoded matplotlib figs
+    error_figs_base64 = []
+    failed_conditions = []
 
     for i, dataframe in enumerate(df):
         filtered_freqs_np = np.array(dataframe['filtered_frequency'])
@@ -356,19 +368,26 @@ def tune_aperiodic_mode(df, freq_range, max_n_peaks, show_errors=True):
 
         r2s = []
         errors = []
+        #model_fail = None
 
         for aperiodic_mode in aperiodic_modes:
             nm = SpectralModel(peak_width_limits=freq_range, max_n_peaks=max_n_peaks, aperiodic_mode=aperiodic_mode)
-            nm.fit(filtered_freqs_np, filtered_powers_np, freq_range)
-            r2s.append(nm.r_squared_)
-            errors.append(nm.error_)
-
-            model_freqs, model_fit = nm.freqs, nm.get_model()
-            fig.add_trace(go.Scatter(
-                x=model_freqs, y=model_fit,
-                mode='lines',
-                name=f'{aperiodic_mode} (R²={nm.r_squared_:.2f}) - Condition {i+1}'
-            ))
+            try:
+              nm.fit(filtered_freqs_np, filtered_powers_np, freq_range)
+              #model_fail = None
+              r2s.append(nm.r_squared_)
+              errors.append(nm.error_)
+  
+              model_freqs, model_fit = nm.freqs, nm.get_model()
+              fig.add_trace(go.Scatter(
+                  x=model_freqs, y=model_fit,
+                  mode='lines',
+                  name=f'{aperiodic_mode} (R²={nm.r_squared_:.2f}) - Condition {i+1}'
+              ))
+            except Exception as e:
+              #model_fail = "Model fitting failed. Please choose your settings again."
+              if i + 1 not in failed_conditions:
+                failed_conditions.append(i + 1)
 
         fig.add_trace(go.Scatter(
             x=nm.freqs, y=nm.get_data(),
@@ -414,75 +433,98 @@ def tune_aperiodic_mode(df, freq_range, max_n_peaks, show_errors=True):
         legend_title='Model Configurations',
         template='plotly_white'
     )
+    
+    model_fail_message = None
+    if failed_conditions:
+        model_fail_message = f"Model fitting failed for condition(s): {', '.join(map(str, failed_conditions))}. Please adjust the aperiodic mode tuning parameter(s)."
 
-    return {
-        'plotly': fig,
-        'matplotlib': error_figs_base64  # list of base64-encoded images
-    }
+    return {'plotly': fig, 'matplotlib': error_figs_base64, 'model_fail': model_fail_message}
 
 
         
-def tune_peak_threshold(filtered_freqs, filtered_powers, freq_range, max_n_peaks, aperiodic_mode, peak_threshold_range, show_errors=True):
-    # Initialize storage
-    r2s = []
-    errors = []
-
-    # Initialize the Plotly figure
+def tune_peak_threshold(df, freq_range, max_n_peaks, aperiodic_mode, start1, stop1, num1, show_errors=True):
     fig = go.Figure()
+    error_figs_base64 = []
+    peak_threshold_range = np.logspace(start = np.log10(start1), stop = np.log10(stop1), num = num1)
+    failed_conditions = []
     
-    filtered_freqs_np = np.array(filtered_freqs)
-    filtered_powers_np = np.array(filtered_powers)
+    for i in range(0, len(df)):
+      dataframe = df[i]
+      r2s = []
+      errors = []
+      filtered_freqs_np = np.array(dataframe['filtered_frequency'])
+      filtered_powers_np = np.array(dataframe['Average Power'])
+      #model_fail = None
 
-    # Loop through peak thresholds and fit models
-    for peak_threshold in peak_threshold_range:
-        nm = SpectralModel(max_n_peaks=max_n_peaks, aperiodic_mode=aperiodic_mode, peak_threshold=peak_threshold)
-        nm.fit(filtered_freqs_np, filtered_powers_np, freq_range=freq_range)
+      # Loop through peak thresholds and fit models
+      for peak_threshold in peak_threshold_range:
+          nm = SpectralModel(peak_width_limits=freq_range, max_n_peaks=max_n_peaks, aperiodic_mode=aperiodic_mode, peak_threshold=peak_threshold)
+          try:
+            nm.fit(filtered_freqs_np, filtered_powers_np, freq_range=freq_range)
+            #model_fail = None
+  
+            # Append metrics
+            r2s.append(nm.r_squared_)
+            errors.append(nm.error_)
+  
+            # Get the model fit and add it as a trace
+            model_freqs, model_fit = nm.freqs, nm.get_model()  # Assuming the attributes are named like this
+            fig.add_trace(go.Scatter(x=model_freqs, y=model_fit,
+                                    mode='lines',
+                                    name=f'PT {peak_threshold:.3g} (R²={nm.r_squared_:.2f}) - Condition{i+1}'))
+          except Exception as e:
+            #model_fail = "Model fitting failed. Please choose your settings again."
+            if i + 1 not in failed_conditions:
+              failed_conditions.append(i + 1)
 
-        # Append metrics
-        r2s.append(nm.r_squared_)
-        errors.append(nm.error_)
-
-        # Get the model fit and add it as a trace
-        model_freqs, model_fit = nm.freqs, nm.get_model()  # Assuming the attributes are named like this
-        fig.add_trace(go.Scatter(x=model_freqs, y=model_fit,
-                                 mode='lines',
-                                 name=f'Peak Threshold {peak_threshold} (R²={nm.r_squared_:.2f})'))
-
-    # Add the original data as a baseline (optional)
-    fig.add_trace(go.Scatter(x=nm.freqs, y=nm.get_data(),
-                             mode='lines', name='Original Spectrum',
-                             line=dict(color='black', dash='dash')))
-
+      # Add the original data as a baseline (optional)
+      fig.add_trace(go.Scatter(x=nm.freqs, y=nm.get_data(),
+                              mode='lines', name=f'Original Spectrum - Condition{i+1}',
+                              line=dict(color='black', dash='dash')))
+                              
+      if show_errors:
+        fig_r2, ax_r2 = plt.subplots()
+        ax_r2.plot(peak_threshold_range, r2s, "bo-")
+        ax_r2.set_title(f"R² - Condition {i+1}")
+        ax_r2.set_ylabel("R²")
+        ax_r2.set_xlabel("Peak Threshold")
+        plt.tight_layout()
+        
+        buf_r2 = BytesIO()
+        fig_r2.savefig(buf_r2, format='png')
+        buf_r2.seek(0)
+        error_figs_base64.append(base64.b64encode(buf_r2.read()).decode('utf-8'))
+        buf_r2.close()
+        plt.close(fig_r2)
+        
+        fig_err, ax_err = plt.subplots()
+        ax_err.plot(peak_threshold_range, errors, "ro-")
+        ax_err.set_ylabel("MSE")
+        ax_err.set_xlabel("Peak Threshold")
+        plt.tight_layout()
+        
+        buf_err = BytesIO()
+        fig_err.savefig(buf_err, format='png')
+        buf_err.seek(0)
+        error_figs_base64.append(base64.b64encode(buf_err.read()).decode('utf-8'))
+        buf_err.close()
+        plt.close(fig_err)
+        
     # Customize the layout
     fig.update_layout(
-        title='Spectral Model Fits Across Different Peak Thresholds',
+        title='Spectral Model Fits Across Different Peak Thresholds (PTs)',
         xaxis_title='Frequency (Hz)',
         yaxis_title='Power',
         legend_title='Model Configurations',
         template='plotly_white'
     )
-    fig.show()
-
-    if show_errors:
-        # Graphs of R2 and Errors using Matplotlib
-        fig, axs = plt.subplots(1, 2, figsize=(16, 5))
-        
-        axs[0].plot(peak_threshold_range, r2s, "b-")  # Using 'bo-' for blue circles connected by lines
-        axs[0].set_title("R² vs. Peak Thresholds")
-        axs[0].set_ylabel("R²")
-        axs[0].set_xlabel("Peak Threshold")
-        axs[0].set_xscale("log")  # Assuming peak_threshold_range needs a log scale
-
-        axs[1].plot(peak_threshold_range, errors, "r-")  # Using 'ro-' for red circles connected by lines
-        axs[1].set_title("MSE vs. Peak Thresholds")
-        axs[1].set_ylabel("MSE")
-        axs[1].set_xlabel("Peak Threshold")
-        axs[1].set_xscale("log")
-
-        plt.tight_layout()
-        plt.show()
-
-
+    
+    model_fail_message = None
+    if failed_conditions:
+        model_fail_message = f"Model fitting failed for condition(s): {', '.join(map(str, failed_conditions))}. Please adjust the peak threshold tuning parameter(s)."
+    
+    return {'plotly': fig, 'matplotlib': error_figs_base64, 'model_fail': model_fail_message}
+  
 
 def preprocess_powers(subset_analyzed, fs=2000, nperseg=4000, freq_range=[1, 175]):
     """

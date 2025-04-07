@@ -12,6 +12,133 @@ module_server <- function(input, output, session, ...){
   # get server tools to tweek
   server_tools <- get_default_handlers(session = session)
 
+
+
+  observe({
+    input_range <- input$threshold_value_range_tuning_peak_threshold
+    step <- 0.1
+    if (is.null(input_range)) return()
+
+    lower <- input_range[1]
+    upper <- input_range[2]
+
+    # If lower bound is >= upper, adjust accordingly
+    if (lower == upper) {
+      if ((upper + step) <= 10) {
+        # Upper bound approaches lower bound: increment upper bound
+        new_upper <- max(upper + step, lower + step)
+        updateSliderInput(session,
+                          inputId = "threshold_value_range_tuning_peak_threshold",
+                          value = c(lower, new_upper))
+      } else if ((upper + step) > 10) {
+        new_lower <- min(upper - step, lower - step)
+        updateSliderInput(session,
+                          inputId = "threshold_value_range_tuning_peak_threshold",
+                          value = c(new_lower, upper))
+      }
+    }
+  })
+
+  observe({
+    input_range <- input$fooof_freq_range
+    step <- 5
+    if (is.null(input_range)) return()
+
+    lower <- input_range[1]
+    upper <- input_range[2]
+
+    # If lower bound is >= upper, adjust accordingly
+    if (upper == lower) {
+      if ((upper + step) <= 300) {
+        # Upper bound approaches lower bound: increment upper bound
+        new_upper <- max(upper + step, lower + step)
+        updateSliderInput(session,
+                          inputId = "fooof_freq_range",
+                          value = c(lower, new_upper))
+      } else if ((upper + step) > 300) {
+        new_lower <- min(upper - step, lower - step)
+        updateSliderInput(session,
+                          inputId = "fooof_freq_range",
+                          value = c(new_lower, upper))
+      }
+    }
+  })
+
+  observe({
+    input_range <- input$freq_range_tuning_max_n_peaks
+    step <- 5
+    if (is.null(input_range)) return()
+
+    lower <- input_range[1]
+    upper <- input_range[2]
+
+    # If lower bound is >= upper, adjust accordingly
+    if (upper == lower) {
+      if ((upper + step) <= 300) {
+        # Upper bound approaches lower bound: increment upper bound
+        new_upper <- max(upper + step, lower + step)
+        updateSliderInput(session,
+                          inputId = "freq_range_tuning_max_n_peaks",
+                          value = c(lower, new_upper))
+      } else if ((upper + step) > 300) {
+        new_lower <- min(upper - step, lower - step)
+        updateSliderInput(session,
+                          inputId = "freq_range_tuning_max_n_peaks",
+                          value = c(new_lower, upper))
+      }
+    }
+  })
+
+  observe({
+    input_range <- input$freq_range_tuning_aperiodic_mode
+    step <- 5
+    if (is.null(input_range)) return()
+
+    lower <- input_range[1]
+    upper <- input_range[2]
+
+    # If lower bound is >= upper, adjust accordingly
+    if (upper == lower) {
+      if ((upper + step) <= 300) {
+        # Upper bound approaches lower bound: increment upper bound
+        new_upper <- max(upper + step, lower + step)
+        updateSliderInput(session,
+                          inputId = "freq_range_tuning_aperiodic_mode",
+                          value = c(lower, new_upper))
+      } else if ((upper + step) > 300) {
+        new_lower <- min(upper - step, lower - step)
+        updateSliderInput(session,
+                          inputId = "freq_range_tuning_aperiodic_mode",
+                          value = c(new_lower, upper))
+      }
+    }
+  })
+
+  observe({
+    input_range <- input$freq_range_tuning_peak_threshold
+    step <- 5
+    if (is.null(input_range)) return()
+
+    lower <- input_range[1]
+    upper <- input_range[2]
+
+    # If lower bound is >= upper, adjust accordingly
+    if (upper == lower) {
+      if ((upper + step) <= 300) {
+        # Upper bound approaches lower bound: increment upper bound
+        new_upper <- max(upper + step, lower + step)
+        updateSliderInput(session,
+                          inputId = "freq_range_tuning_peak_threshold",
+                          value = c(lower, new_upper))
+      } else if ((upper + step) > 300) {
+        new_lower <- min(upper - step, lower - step)
+        updateSliderInput(session,
+                          inputId = "freq_range_tuning_peak_threshold",
+                          value = c(new_lower, upper))
+      }
+    }
+  })
+
   # Run analysis once the following input IDs are changed
   # This is used by auto-recalculation feature
   # server_tools$run_analysis_onchange(
@@ -376,6 +503,21 @@ module_server <- function(input, output, session, ...){
     freq_range <- pipeline_settings$freq_range
     max_n_peaks <- pipeline_settings$max_n_peaks
 
+    lower_bound <- max(freq_range[1], freq_range_aperiodic_tuning[1])
+    upper_bound <- min(freq_range[2], freq_range_aperiodic_tuning[2])
+
+    # If no overlap, return error message UI
+    if (lower_bound >= upper_bound) {
+      return(
+        htmltools::tags$p(
+          style = "color: red; font-weight: bold; margin-left: 20px; margin-top: 15px;",
+          "The frequency range for aperiodic tuning does not overlap with the frequency range of the data. Please check your frequency settings."
+        )
+      )
+    }
+
+    freq_range_msg <- paste("Frequency range:", lower_bound, "Hz to", upper_bound, "Hz")
+
 
     shared <- pipeline$python_module(type = "shared")
     result <- rpymat::py_to_r(shared$tune_aperiodic_mode(
@@ -384,6 +526,15 @@ module_server <- function(input, output, session, ...){
       max_n_peaks_aperiodic_tuning,
       show_errors = TRUE
     ))
+
+    if (!is.null(result$model_fail)) {
+      return(
+        htmltools::tags$p(
+          style = "color: red; font-weight: bold; margin-left: 20px; margin-top: 15px;",
+          result$model_fail
+        )
+      )
+    }
 
     plotly_html <- htmltools::HTML(rpymat::py_to_r(result$plotly$to_html()))
     matplotlib_imgs <- result$matplotlib
@@ -410,6 +561,7 @@ module_server <- function(input, output, session, ...){
     })
 
     htmltools::tagList(
+      htmltools::tags$p(style = "font-weight: bold; font-size: 16px; margin-left: 20px; margin-top: 15px;", freq_range_msg),
       plotly_html,
       condition_boxes
     )
@@ -434,6 +586,21 @@ module_server <- function(input, output, session, ...){
     freq_range <- pipeline_settings$freq_range
     max_n_peaks <- pipeline_settings$max_n_peaks
 
+    lower_bound <- max(freq_range[1], freq_range_tuning_max_n_peaks[1])
+    upper_bound <- min(freq_range[2], freq_range_tuning_max_n_peaks[2])
+
+    # If no overlap, return error message UI
+    if (lower_bound >= upper_bound) {
+      return(
+        htmltools::tags$p(
+          style = "color: red; font-weight: bold; margin-left: 20px; margin-top: 15px;",
+          "The frequency range for max-n peaks tuning does not overlap with the frequency range of the data. Please check your frequency settings."
+        )
+      )
+    }
+
+    freq_range_msg <- paste("Frequency range:", lower_bound, "Hz to", upper_bound, "Hz")
+
 
     shared <- pipeline$python_module(type = "shared")
     result <- rpymat::py_to_r(shared$tune_max_n_peaks(
@@ -443,6 +610,15 @@ module_server <- function(input, output, session, ...){
       peaks_range_tuning_max_n_peaks,
       show_errors = TRUE
     ))
+
+    if (!is.null(result$model_fail)) {
+      return(
+        htmltools::tags$p(
+          style = "color: red; font-weight: bold; margin-left: 20px; margin-top: 15px;",
+          result$model_fail
+        )
+      )
+    }
 
     plotly_html <- htmltools::HTML(rpymat::py_to_r(result$plotly$to_html()))
     matplotlib_imgs <- result$matplotlib
@@ -469,13 +645,102 @@ module_server <- function(input, output, session, ...){
     })
 
     htmltools::tagList(
+      htmltools::tags$p(style = "font-weight: bold; font-size: 16px; margin-left: 20px; margin-top: 15px;;", freq_range_msg),
+      plotly_html,
+      condition_boxes
+    )
+  })
+
+  # Output for peak threshold tuning
+  output$peak_threshold_tuning_part <- shiny::renderUI({
+    shiny::validate(
+      shiny::need(
+        length(local_reactives$update_outputs) &&
+          !isFALSE(local_reactives$update_outputs),
+        message = "Please run the module first"
+      )
+    )
+
+    power_outputs_list <- local_data$power_outputs_list
+    pipeline_settings <- pipeline$get_settings()
+
+    freq_range_tuning_peak_threshold <- pipeline_settings$freq_range_tuning_peak_threshold
+    max_n_peaks_tuning_peak_threshold <- pipeline_settings$max_n_peaks_tuning_peak_threshold
+    aperiodic_mode_tuning_peak_threshold <- pipeline_settings$aperiodic_mode_tuning_peak_threshold
+    threshold_value_range_tuning_peak_threshold <- pipeline_settings$threshold_value_range_tuning_peak_threshold
+    number_of_threshold_value_tuning_peak_threshold <- pipeline_settings$number_of_threshold_value_tuning_peak_threshold
+    freq_range <- pipeline_settings$freq_range
+    max_n_peaks <- pipeline_settings$max_n_peaks
+
+    lower_bound <- max(freq_range[1], freq_range_tuning_peak_threshold[1])
+    upper_bound <- min(freq_range[2], freq_range_tuning_peak_threshold[2])
+
+    # If no overlap, return error message UI
+    if (lower_bound >= upper_bound) {
+      return(
+        htmltools::tags$p(
+          style = "color: red; font-weight: bold; margin-left: 20px; margin-top: 15px;",
+          "The frequency range for max-n peaks tuning does not overlap with the frequency range of the data. Please check your frequency settings."
+        )
+      )
+    }
+
+    freq_range_msg <- paste("Frequency range:", lower_bound, "Hz to", upper_bound, "Hz")
+
+    shared <- pipeline$python_module(type = "shared")
+    result <- rpymat::py_to_r(shared$tune_peak_threshold(
+      power_outputs_list,
+      freq_range_tuning_peak_threshold,
+      max_n_peaks_tuning_peak_threshold,
+      aperiodic_mode_tuning_peak_threshold,
+      threshold_value_range_tuning_peak_threshold[1],
+      threshold_value_range_tuning_peak_threshold[2],
+      number_of_threshold_value_tuning_peak_threshold,
+      show_errors = TRUE
+    ))
+
+    if (!is.null(result$model_fail)) {
+      return(
+        htmltools::tags$p(
+          style = "color: red; font-weight: bold; margin-left: 20px; margin-top: 15px;",
+          result$model_fail
+        )
+      )
+    }
+
+    plotly_html <- htmltools::HTML(rpymat::py_to_r(result$plotly$to_html()))
+    matplotlib_imgs <- result$matplotlib
+
+    # Group into condition boxes (2 images per condition)
+    condition_boxes <- lapply(seq(1, length(matplotlib_imgs), by = 2), function(i) {
+      row_imgs <- matplotlib_imgs[i:min(i+1, length(matplotlib_imgs))]
+      htmltools::tags$div(
+        style = "border: 2px solid #ddd; border-radius: 8px; padding: 15px; margin-top: 20px; background-color: #fafafa;",
+        htmltools::tags$div(
+          style = "font-weight: bold; margin-bottom: 11px;",
+          paste("Error Plots - Condition", (i + 1) %/% 2)
+        ),
+        htmltools::tags$div(
+          style = "display: flex; justify-content: space-around; flex-wrap: wrap;",
+          lapply(row_imgs, function(base64_img) {
+            htmltools::tags$img(
+              src = paste0("data:image/png;base64,", base64_img),
+              style = "width: 48%; height: auto;"
+            )
+          })
+        )
+      )
+    })
+
+    htmltools::tagList(
+      htmltools::tags$p(style = "font-weight: bold; font-size: 16px; margin-left: 20px; margin-top: 15px;", freq_range_msg),
       plotly_html,
       condition_boxes
     )
   })
 
 
-
+  # Output for fooof model fits
   output$fooof_plot_results_testing <- shiny::renderUI({
     shiny::validate(
       shiny::need(
