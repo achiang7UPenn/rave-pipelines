@@ -1,5 +1,5 @@
 analyze_channel: 13.0
-aperiodic_mode: knee
+aperiodic_mode: fixed
 aperiodic_mode_tuning_max_n_peaks: knee
 aperiodic_mode_tuning_peak_threshold: knee
 channels_to_load: 13-16,24
@@ -34,8 +34,8 @@ condition_groupings:
     - drive_a
 epoch_name: auditory_onset
 freq_range:
-- 1
-- 300
+- 1.0
+- 50.1
 freq_range_aperiodic_tuning:
 - 1
 - 300
@@ -46,7 +46,7 @@ freq_range_tuning_peak_threshold:
 - 1
 - 300
 individual_trials: no
-max_n_peaks: 5
+max_n_peaks: 11
 max_n_peaks_aperiodic_tuning: 5
 max_n_peaks_tuning_peak_threshold: 5
 number_of_threshold_value_tuning_peak_threshold: 100

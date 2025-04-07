@@ -629,6 +629,7 @@ def plot_fooof_fits(df, freq_range, max_n_peaks, aperiodic_mode, plt_log=False):
   for i in range(0, len(df)):
       # Initialize storage
       dataframe = df[i]
+      center_frequencies = []
 
       filtered_freqs_np = np.array(dataframe['filtered_frequency'])
       filtered_powers_np = np.array(dataframe['Average Power'])
@@ -657,6 +658,21 @@ def plot_fooof_fits(df, freq_range, max_n_peaks, aperiodic_mode, plt_log=False):
                                mode='lines',
                                name=f'Original Spectrum - Condition {i+1}',
                                line=dict(color='black')))
+      
+      model_peak_params = fm.get_params('peak_params')
+      for j in range(0, len(model_peak_params)):
+        center_frequencies.append(model_peak_params[j][0])
+        
+      for peak in center_frequencies:
+            peak_x = np.log10(peak) if plt_log else peak
+            fig.add_shape(
+                type='line',
+                x0=peak_x, x1=peak_x,
+                y0=min(model_fit)-1, y1=max(model_fit)+0.5,
+                line=dict(color="green", dash="dot", width=2)
+            )
+      
+      
       # Customize the layout
       fig.update_layout(
           title=f'FOOOF Model - Condition {i+1}',
