@@ -1,7 +1,7 @@
 analyze_channel: 13.0
-aperiodic_mode: fixed
-aperiodic_mode_tuning_max_n_peaks: knee
-aperiodic_mode_tuning_peak_threshold: knee
+aperiodic_mode: knee
+aperiodic_mode_tuning_max_n_peaks: fixed
+aperiodic_mode_tuning_peak_threshold: fixed
 channels_to_load: 13-16,24
 condition_groupings:
   '1':
@@ -29,27 +29,27 @@ condition_groupings:
     conditions:
     - AdriveVlast
   '3':
-    label: Testing Again
+    label: Testing again
     conditions:
     - drive_a
 epoch_name: auditory_onset
 freq_range:
-- 1.0
-- 50.1
+- 1
+- 300
 freq_range_aperiodic_tuning:
 - 1
-- 300
+- 100
 freq_range_tuning_max_n_peaks:
 - 1
-- 300
+- 100
 freq_range_tuning_peak_threshold:
 - 1
-- 300
+- 100
 individual_trials: no
-max_n_peaks: 11
-max_n_peaks_aperiodic_tuning: 5
-max_n_peaks_tuning_peak_threshold: 5
-number_of_threshold_value_tuning_peak_threshold: 100
+max_n_peaks: 15
+max_n_peaks_aperiodic_tuning: 8
+max_n_peaks_tuning_peak_threshold: 8
+number_of_threshold_value_tuning_peak_threshold: 50
 peaks_range_tuning_max_n_peaks:
 - 1
 - 2
@@ -66,13 +66,48 @@ peaks_range_tuning_max_n_peaks:
 - 13
 - 14
 - 15
+- 16
+- 17
+- 18
+- 19
+- 20
+- 21
+- 22
+- 23
+- 24
+- 25
+- 26
+- 27
+- 28
+- 29
+- 30
+- 31
+- 32
+- 33
+- 34
+- 35
+- 36
+- 37
+- 38
+- 39
+- 40
+- 41
+- 42
+- 43
+- 44
+- 45
+- 46
+- 47
+- 48
+- 49
+- 50
 plt_log: no
 project_name: demo
 reference_name: default
 subject_code: DemoSubject
 threshold_value_range_tuning_peak_threshold:
 - 1
-- 10
+- 5
 time_window_to_load:
 - -1
 - 2

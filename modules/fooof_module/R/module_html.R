@@ -27,6 +27,16 @@ module_html <- function(){
               ravedash::flex_group_box(
                 title = "Fooof Parameters",
 
+                shidashi::flex_item(
+                  shiny::checkboxInput(
+                    inputId = ns("fooof_ind_trials"),
+                    label = "Plot individual trials",
+                    value = FALSE
+                  )
+                ),
+
+                shidashi::flex_break(),
+
                 # first item
                 shidashi::flex_item(
                   shiny::sliderInput(
@@ -252,15 +262,15 @@ module_html <- function(){
               )
             ),
 
-            ravedash::output_card(
-              'Individual Trials',
-              class_body = "no-padding fill-width height-450 min-height-450 resize-vertical",
-              shiny::div(
-                class = 'position-relative fill',
-                shiny::uiOutput(ns("individual_trials_plot"), width = '100%', height = "100%")
-                # plotly::plotlyOutput(ns("collapse_over_trial"), width = '100%', height = "100%")
-              )
-            ),
+            # ravedash::output_card(
+            #   'Individual Trials',
+            #   class_body = "no-padding fill-width height-450 min-height-450 resize-vertical",
+            #   shiny::div(
+            #     class = 'position-relative fill',
+            #     shiny::uiOutput(ns("individual_trials_plot"), width = '100%', height = "100%")
+            #     # plotly::plotlyOutput(ns("collapse_over_trial"), width = '100%', height = "100%")
+            #   )
+            # ),
 
 
             # ravedash::output_card(

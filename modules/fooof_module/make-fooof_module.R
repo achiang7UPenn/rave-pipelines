@@ -244,6 +244,30 @@ rm(._._env_._.)
             }), target_depends = c("repository", "condition_groupings"
             )), deps = c("repository", "condition_groupings"), 
         cue = targets::tar_cue("thorough"), pattern = NULL, iteration = "list"), 
+    give_conditions_analyzed = targets::tar_target_raw(name = "conditions_analyzed", 
+        command = quote({
+            .__target_expr__. <- quote({
+                condition_keys <- names(condition_groupings)
+                conditions_analyzed <- lapply(condition_keys, 
+                  function(key) condition_groupings[[key]][["conditions"]])
+            })
+            tryCatch({
+                eval(.__target_expr__.)
+                return(conditions_analyzed)
+            }, error = function(e) {
+                asNamespace("ravepipeline")$resolve_pipeline_error(name = "conditions_analyzed", 
+                  condition = e, expr = .__target_expr__.)
+            })
+        }), format = asNamespace("ravepipeline")$target_format_dynamic(name = NULL, 
+            target_export = "conditions_analyzed", target_expr = quote({
+                {
+                  condition_keys <- names(condition_groupings)
+                  conditions_analyzed <- lapply(condition_keys, 
+                    function(key) condition_groupings[[key]][["conditions"]])
+                }
+                conditions_analyzed
+            }), target_depends = "condition_groupings"), deps = "condition_groupings", 
+        cue = targets::tar_cue("thorough"), pattern = NULL, iteration = "list"), 
     generate_power_outputs = targets::tar_target_raw(name = "power_outputs_list", 
         command = quote({
             .py_error_handler <- function(e, use_py_last_error = TRUE) {

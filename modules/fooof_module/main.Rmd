@@ -88,8 +88,16 @@ subset_analyzed <- lapply(conditions_analyzed, function(conditions) {
 # repository$voltage$data_list$e_14
 ```
 
+```{rave give_conditions_analyzed, use_rave = TRUE, deps = "condition_groupings", export = "conditions_analyzed"}
+condition_keys <- names(condition_groupings)
+conditions_analyzed <- lapply(condition_keys, function(key)
+  condition_groupings[[key]][['conditions']])
+```
+
+
 
 ```{python}
+conditions_analyzed = r.conditions_analyzed
 subset_analyzed = r.subset_analyzed
 sample_rate = r.sample_rate
 window_length = r.window_length
@@ -130,8 +138,6 @@ power_outputs = power_outputs_list[0]
 ```
 
 
-
-
 ```{python plot_trials_welch, use_rave = FALSE, deps = "power_outputs_list"}
 individual_trials = False
 shared.plot_trials(power_outputs_list, individual_trials=individual_trials)
@@ -168,7 +174,8 @@ shared.plot_fooof_fits(
   freq_range,
   max_n_peaks, 
   aperiodic_mode,
-  plt_log=plt_log
+  plt_log=plt_log,
+  condition_names=conditions_analyzed
 )
 ```
 

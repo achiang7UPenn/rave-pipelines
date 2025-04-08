@@ -624,7 +624,7 @@ def new_fit_fooof(df, freq_range = [1,300],
 
 
 # Plot all fooof fits in one graph
-def plot_fooof_fits(df, freq_range, max_n_peaks, aperiodic_mode, plt_log=False):
+def plot_fooof_fits(df, freq_range, max_n_peaks, aperiodic_mode, plt_log=False):#, condition_names=None):
   figures=[]
   for i in range(0, len(df)):
       # Initialize storage
@@ -669,15 +669,31 @@ def plot_fooof_fits(df, freq_range, max_n_peaks, aperiodic_mode, plt_log=False):
                 type='line',
                 x0=peak_x, x1=peak_x,
                 y0=min(model_fit)-1, y1=max(model_fit)+0.5,
-                line=dict(color="green", dash="dot", width=2)
+                line=dict(color="green", dash="dot", width=2),
+                name=f'Peak at {peak_x:.2f}'
             )
+            
+            fig.add_trace(go.Scatter(
+                x=[None], y=[None],
+                mode='lines',
+                name=f'Peak at {peak_x:.2f} Hz',
+                line=dict(color="green", dash="dot", width=2)
+            ))
       
-      
+      # if condition_names:
+      #   name = condition_names[i]
+      #   # If name is a list, join the items
+      #   if isinstance(name, list):
+      #       label = ", ".join(name)
+      #   else:
+      #       label = name
+      #   title = f"FOOOF Model - Condition {i+1} ({label})"
+        
       # Customize the layout
       fig.update_layout(
-          title=f'FOOOF Model - Condition {i+1}',
+          title=f"FOOOF Model - Condition {i+1}",
           xaxis_title='log(Frequency)' if plt_log else 'Frequency',
-          yaxis_title='Power',
+          yaxis_title='log(Power)',
           template='plotly_white'
       )
       figures.append(fig)

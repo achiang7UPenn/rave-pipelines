@@ -211,6 +211,7 @@ module_server <- function(input, output, session, ...){
         }),
 
         # Customized inputs
+        individual_trials = input$fooof_ind_trials,
         window_length = input$fooof_winlen,
         freq_range = input$fooof_freq_range,
         max_n_peaks = input$fooof_max_n_peaks,
@@ -248,7 +249,7 @@ module_server <- function(input, output, session, ...){
 
       # Step 3: run analysis to get the results
       results <- pipeline$run(
-        names = c('power_outputs', 'fitted_fooof', "power_outputs_list"),
+        names = c('power_outputs', 'fitted_fooof', 'power_outputs_list', 'conditions_analyzed'),
 
         scheduler = "none",
         type = "vanilla"
@@ -259,6 +260,7 @@ module_server <- function(input, output, session, ...){
       local_data$power_outputs <- results$power_outputs
       local_data$fitted_fooof <- results$fitted_fooof
       local_data$power_outputs_list <- results$power_outputs_list
+      local_data$conditions_analyzed <- results$conditions_analyzed
       local_reactives$update_outputs <- Sys.time()
 
       return()
@@ -317,6 +319,13 @@ module_server <- function(input, output, session, ...){
         )
       }
 
+      individual_trials <- pipeline$get_settings("individual_trials")
+      if(is.logical(individual_trials)) {
+        shiny::updateCheckboxInput(session = session,
+                                   inputId = "fooof_ind_trials",
+                                   value = individual_trials)
+      }
+
       # Update window length
       window_length <- pipeline$get_settings("window_length")
       if(isTRUE(window_length > 0)) {
@@ -324,6 +333,111 @@ module_server <- function(input, output, session, ...){
                                  inputId = "fooof_winlen",
                                  value = window_length)
       }
+
+      freq_range <- pipeline$get_settings("freq_range")
+      if(isTRUE(freq_range[1] > 0)) {
+        shiny::updateSliderInput(session = session,
+                                 inputId = "fooof_freq_range",
+                                 value = c(freq_range[1], freq_range[2]))
+      }
+
+      max_n_peaks <- pipeline$get_settings("max_n_peaks")
+      if(isTRUE(max_n_peaks > 0)) {
+        shiny::updateSliderInput(session = session,
+                                 inputId = "fooof_max_n_peaks",
+                                 value = max_n_peaks)
+      }
+
+      aperiodic_mode <- pipeline$get_settings("aperiodic_mode")
+      if(aperiodic_mode == 'fixed' || aperiodic_mode == 'knee') {
+        shiny::updateSelectInput(session = session,
+                                 inputId = "fooof_aperiodic_mode",
+                                 selected = aperiodic_mode)
+      }
+
+      plt_log <- pipeline$get_settings("plt_log")
+      if(is.logical(plt_log)) {
+        shiny::updateCheckboxInput(session = session,
+                                   inputId = "fooof_bool",
+                                   value = plt_log)
+      }
+
+      freq_range_tuning_max_n_peaks <- pipeline$get_settings("freq_range_tuning_max_n_peaks")
+      if(isTRUE(freq_range_tuning_max_n_peaks[1] > 0)) {
+        shiny::updateSliderInput(session = session,
+                                 inputId = "freq_range_tuning_max_n_peaks",
+                                 value = c(freq_range_tuning_max_n_peaks[1], freq_range_tuning_max_n_peaks[2]))
+      }
+
+      freq_range_aperiodic_tuning <- pipeline$get_settings("freq_range_aperiodic_tuning")
+      if(isTRUE(freq_range_aperiodic_tuning[1] > 0)) {
+        shiny::updateSliderInput(session = session,
+                                 inputId = "freq_range_tuning_aperiodic_mode",
+                                 value = c(freq_range_aperiodic_tuning[1], freq_range_aperiodic_tuning[2]))
+      }
+
+      max_n_peaks_aperiodic_tuning <- pipeline$get_settings("max_n_peaks_aperiodic_tuning")
+      if(isTRUE(max_n_peaks_aperiodic_tuning > 0)) {
+        shiny::updateSliderInput(session = session,
+                                 inputId = "max_n_peaks_tuning_aperiodic_mode",
+                                 value = max_n_peaks_aperiodic_tuning)
+      }
+
+      freq_range_tuning_peak_threshold <- pipeline$get_settings("freq_range_tuning_peak_threshold")
+      if(isTRUE(freq_range_tuning_peak_threshold[1] > 0)) {
+        shiny::updateSliderInput(session = session,
+                                 inputId = "freq_range_tuning_peak_threshold",
+                                 value = c(freq_range_tuning_peak_threshold[1], freq_range_tuning_peak_threshold[2]))
+      }
+
+      threshold_value_range_tuning_peak_threshold <- pipeline$get_settings("threshold_value_range_tuning_peak_threshold")
+      if(isTRUE(threshold_value_range_tuning_peak_threshold[1] > 0)) {
+        shiny::updateSliderInput(session = session,
+                                 inputId = "threshold_value_range_tuning_peak_threshold",
+                                 value = c(threshold_value_range_tuning_peak_threshold[1], threshold_value_range_tuning_peak_threshold[2]))
+      }
+
+      number_of_threshold_value_tuning_peak_threshold <- pipeline$get_settings("number_of_threshold_value_tuning_peak_threshold")
+      if(isTRUE(number_of_threshold_value_tuning_peak_threshold > 0)) {
+        shiny::updateSliderInput(session = session,
+                                 inputId = "number_of_threshold_value_tuning_peak_threshold",
+                                 value = number_of_threshold_value_tuning_peak_threshold)
+      }
+
+      aperiodic_mode_tuning_peak_threshold <- pipeline$get_settings("aperiodic_mode_tuning_peak_threshold")
+      if(aperiodic_mode_tuning_peak_threshold == 'fixed' || aperiodic_mode_tuning_peak_threshold == 'knee') {
+        shiny::updateSelectInput(session = session,
+                                 inputId = "aperiodic_mode_tuning_peak_threshold",
+                                 selected = aperiodic_mode_tuning_peak_threshold)
+      }
+
+      max_n_peaks_tuning_peak_threshold <- pipeline$get_settings("max_n_peaks_tuning_peak_threshold")
+      if(isTRUE(max_n_peaks_tuning_peak_threshold > 0)) {
+        shiny::updateSliderInput(session = session,
+                                 inputId = "max_n_peaks_tuning_peak_threshold",
+                                 value = max_n_peaks_tuning_peak_threshold)
+      }
+
+      peaks_range_tuning_max_n_peaks <- pipeline$get_settings("peaks_range_tuning_max_n_peaks")
+      if(isTRUE(peaks_range_tuning_max_n_peaks[1] > 0)) {
+        shiny::updateSliderInput(session = session,
+                                 inputId = "peaks_range_tuning_max_n_peaks",
+                                 value = c(peaks_range_tuning_max_n_peaks[1], peaks_range_tuning_max_n_peaks[length(peaks_range_tuning_max_n_peaks)]))
+      }
+
+      aperiodic_mode_tuning_max_n_peaks <- pipeline$get_settings("aperiodic_mode_tuning_max_n_peaks")
+      if(aperiodic_mode_tuning_max_n_peaks == 'fixed' || aperiodic_mode_tuning_max_n_peaks == 'knee') {
+        shiny::updateSelectInput(session = session,
+                                 inputId = "aperiodic_mode_tuning_max_n_peaks",
+                                 selected = aperiodic_mode_tuning_max_n_peaks)
+      }
+
+
+
+
+
+
+
 
       # Reset preset UI & data
       component_container$reset_data()
@@ -350,9 +464,15 @@ module_server <- function(input, output, session, ...){
       )
     )
 
+
+
     # retrieve the `power_outputs` from `local_data`
     power_outputs <- local_data$power_outputs
     power_outputs_list <- local_data$power_outputs_list
+
+    pipeline_settings <- pipeline$get_settings()
+
+    individual_trials <- !isFALSE(input$fooof_ind_trials)
 
     # For debug purposes, run
     # pipeline <- raveio::pipeline("fooof_module", paths = "/Users/dipterix/Dropbox (Personal)/projects/rave-pipeline-ese2025/modules/")
@@ -362,37 +482,37 @@ module_server <- function(input, output, session, ...){
     # shared.plot_trials(power_outputs, individual_trials=individual_trials)
 
     shared <- pipeline$python_module(type = "shared")
-    plot <- shared$plot_trials(power_outputs_list, individual_trials = FALSE)
+    plot <- shared$plot_trials(power_outputs_list, individual_trials = individual_trials)
 
     return(shiny::HTML(rpymat::py_to_r(plot$to_html())))
   })
 
-  # Output for plotting individual trials
-  output$individual_trials_plot <- shiny::renderUI({
-    shiny::validate(
-      shiny::need(
-        length(local_reactives$update_outputs) &&
-          !isFALSE(local_reactives$update_outputs),
-        message = "Please run the module first"
-      )
-    )
+  # # Output for plotting individual trials
+  # output$individual_trials_plot <- shiny::renderUI({
+  #   shiny::validate(
+  #     shiny::need(
+  #       length(local_reactives$update_outputs) &&
+  #         !isFALSE(local_reactives$update_outputs),
+  #       message = "Please run the module first"
+  #     )
+  #   )
 
-    # retrieve the `power_outputs` from `local_data`
-    power_outputs <- local_data$power_outputs
-    power_outputs_list <- local_data$power_outputs_list
-
-    # For debug purposes, run
-    # pipeline <- raveio::pipeline("fooof_module", paths = "/Users/dipterix/Dropbox (Personal)/projects/rave-pipeline-ese2025/modules/")
-    # power_outputs <- pipeline$read("power_outputs")
-
-    # individual_trials = False
-    # shared.plot_trials(power_outputs, individual_trials=individual_trials)
-
-    shared <- pipeline$python_module(type = "shared")
-    plot <- shared$plot_trials(power_outputs_list, individual_trials = TRUE)
-
-    return(shiny::HTML(rpymat::py_to_r(plot$to_html())))
-  })
+  #   # retrieve the `power_outputs` from `local_data`
+  #   power_outputs <- local_data$power_outputs
+  #   power_outputs_list <- local_data$power_outputs_list
+  #
+  #   # For debug purposes, run
+  #   # pipeline <- raveio::pipeline("fooof_module", paths = "/Users/dipterix/Dropbox (Personal)/projects/rave-pipeline-ese2025/modules/")
+  #   # power_outputs <- pipeline$read("power_outputs")
+  #
+  #   # individual_trials = False
+  #   # shared.plot_trials(power_outputs, individual_trials=individual_trials)
+  #
+  #   shared <- pipeline$python_module(type = "shared")
+  #   plot <- shared$plot_trials(power_outputs_list, individual_trials = TRUE)
+  #
+  #   return(shiny::HTML(rpymat::py_to_r(plot$to_html())))
+  # })
 
   # Output for reports
   output$fooof_print_results <- shiny::renderPrint({
@@ -753,6 +873,7 @@ module_server <- function(input, output, session, ...){
     # retrieve the `power_outputs` from `local_data`
     power_outputs <- local_data$power_outputs
     power_outputs_list <- local_data$power_outputs_list
+    conditions_analyzed <- local_data$conditions_analyzed
 
     pipeline_settings <- pipeline$get_settings()
 
