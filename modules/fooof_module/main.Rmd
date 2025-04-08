@@ -88,16 +88,16 @@ subset_analyzed <- lapply(conditions_analyzed, function(conditions) {
 # repository$voltage$data_list$e_14
 ```
 
-```{rave give_conditions_analyzed, use_rave = TRUE, deps = "condition_groupings", export = "conditions_analyzed"}
+```{rave give_conditions_analyzed, use_rave = TRUE, deps = "condition_groupings", export = "conditions_analyzed_1"}
 condition_keys <- names(condition_groupings)
-conditions_analyzed <- lapply(condition_keys, function(key)
-  condition_groupings[[key]][['conditions']])
+conditions_analyzed_1 <- lapply(condition_keys, function(key)
+  condition_groupings[[key]][['label']])
 ```
 
 
 
 ```{python}
-conditions_analyzed = r.conditions_analyzed
+conditions_analyzed_1 = r.conditions_analyzed_1
 subset_analyzed = r.subset_analyzed
 sample_rate = r.sample_rate
 window_length = r.window_length
@@ -163,7 +163,7 @@ fitted_fooof = shared.fit_fooof(
 ```
 
 
-```{python plot_fooof_fit, use_rave = FALSE, deps = c("power_outputs_list", "max_n_peaks", "aperiodic_mode", "freq_range")}
+```{python plot_fooof_fit, use_rave = FALSE, deps = c("power_outputs_list", "max_n_peaks", "aperiodic_mode", "freq_range", "conditions_analyzed_1")}
 # title = None
 freq_range = freq_range
 max_n_peaks=max_n_peaks
@@ -174,8 +174,8 @@ shared.plot_fooof_fits(
   freq_range,
   max_n_peaks, 
   aperiodic_mode,
+  conditions_analyzed_1,
   plt_log=plt_log,
-  condition_names=conditions_analyzed
 )
 ```
 

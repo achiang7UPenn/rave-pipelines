@@ -218,7 +218,7 @@ def add_mean_and_std(df, mean_col_name="Average Power", std_col_name="StdDev"):
 
     return df
 
-def plot_trials(df, individual_trials=False):
+def plot_trials(df, conditions, individual_trials=False):
     fig = go.Figure()
     for i in range(0, len(df)):
       dataframe = df[i]
@@ -228,7 +228,7 @@ def plot_trials(df, individual_trials=False):
           x=dataframe['filtered_frequency'],
           y=np.log10(dataframe['Average Power']),
           mode='lines',
-          name=f'Average Power Condition {i+1}'
+          name=f'Average Power - {conditions[i]}'
       ))
   
       # Add the second trace (filt_powers electrode_14_std)
@@ -236,7 +236,7 @@ def plot_trials(df, individual_trials=False):
           x=dataframe['filtered_frequency'],
           y=np.log10(dataframe['StdDev']),
           mode='lines',
-          name=f'Standard Deviation Condition {i+1}'
+          name=f'Standard Deviation - {conditions[i]}'
       ))
   
       if individual_trials:
@@ -271,7 +271,7 @@ def plot_raw_data(data, fs):
   plt.show()
 
 
-def tune_max_n_peaks(df, freq_range, aperiodic_mode, peaks_range, show_errors=True):
+def tune_max_n_peaks(df, freq_range, aperiodic_mode, peaks_range, conditions, show_errors=True):
   fig = go.Figure()
   error_figs_base64 = []
   failed_conditions = []
@@ -299,7 +299,7 @@ def tune_max_n_peaks(df, freq_range, aperiodic_mode, peaks_range, show_errors=Tr
         model_freqs, model_fit = nm.freqs, nm.get_model()
         fig.add_trace(go.Scatter(x=model_freqs, y=model_fit,
                                 mode='lines',
-                                name=f'{max_n_peaks} peaks (R²={nm.r_squared_:.2f}) - Condition{i+1}'))
+                                name=f'{max_n_peaks} peaks (R²={nm.r_squared_:.2f}) - {conditions[i]}'))
       except Exception as e:
         #model_fail = "Model fitting failed. Please choose your settings again."
         if i + 1 not in failed_conditions:
@@ -307,13 +307,13 @@ def tune_max_n_peaks(df, freq_range, aperiodic_mode, peaks_range, show_errors=Tr
       
 
     fig.add_trace(go.Scatter(x=nm.freqs, y=nm.get_data(),
-                            mode='lines', name=f'Original Spectrum - Condition{i+1}',
+                            mode='lines', name=f'Original Spectrum - {conditions[i]}',
                             line=dict(color='black', dash='dash')))
                             
     if show_errors:
       fig_r2, ax_r2 = plt.subplots()
       ax_r2.plot(peaks_range, r2s, "bo-")
-      ax_r2.set_title(f"R² - Condition {i+1}")
+      ax_r2.set_title(f"R² - {conditions[i]}")
       ax_r2.set_ylabel("R²")
       ax_r2.set_xlabel("Number of Peaks")
       plt.tight_layout()
@@ -327,7 +327,7 @@ def tune_max_n_peaks(df, freq_range, aperiodic_mode, peaks_range, show_errors=Tr
       
       fig_err, ax_err = plt.subplots()
       ax_err.plot(peaks_range, errors, "ro-")
-      ax_err.set_title(f"MSE - Condition {i+1}")
+      ax_err.set_title(f"MSE - {conditions[i]}")
       ax_err.set_ylabel("MSE")
       ax_err.set_xlabel("Number of Peaks")
       plt.tight_layout()
@@ -343,7 +343,7 @@ def tune_max_n_peaks(df, freq_range, aperiodic_mode, peaks_range, show_errors=Tr
   fig.update_layout(
       title='Spectral Model Fits Across Different Peak Numbers',
       xaxis_title='Frequency (Hz)',
-      yaxis_title='Power',
+      yaxis_title='log(Power)',
       legend_title='Model',
       template='plotly_white'
   )
@@ -356,7 +356,7 @@ def tune_max_n_peaks(df, freq_range, aperiodic_mode, peaks_range, show_errors=Tr
 
 
 
-def tune_aperiodic_mode(df, freq_range, max_n_peaks, show_errors=True):
+def tune_aperiodic_mode(df, freq_range, max_n_peaks, conditions, show_errors=True):
     fig = go.Figure()
     aperiodic_modes = ['fixed', 'knee']
     error_figs_base64 = []
@@ -382,7 +382,7 @@ def tune_aperiodic_mode(df, freq_range, max_n_peaks, show_errors=True):
               fig.add_trace(go.Scatter(
                   x=model_freqs, y=model_fit,
                   mode='lines',
-                  name=f'{aperiodic_mode} (R²={nm.r_squared_:.2f}) - Condition {i+1}'
+                  name=f'{aperiodic_mode} (R²={nm.r_squared_:.2f}) - {conditions[i]}'
               ))
             except Exception as e:
               #model_fail = "Model fitting failed. Please choose your settings again."
@@ -391,7 +391,7 @@ def tune_aperiodic_mode(df, freq_range, max_n_peaks, show_errors=True):
 
         fig.add_trace(go.Scatter(
             x=nm.freqs, y=nm.get_data(),
-            mode='lines', name=f'Original Spectrum - Condition {i+1}',
+            mode='lines', name=f'Original Spectrum - {conditions[i]}',
             line=dict(color='black', dash='dash')
         ))
 
@@ -399,7 +399,7 @@ def tune_aperiodic_mode(df, freq_range, max_n_peaks, show_errors=True):
             # R² plot
             fig_r2, ax_r2 = plt.subplots()
             ax_r2.plot(aperiodic_modes, r2s, "bo-")
-            ax_r2.set_title(f"R² - Condition {i+1}")
+            ax_r2.set_title(f"R² - {conditions[i]}")
             ax_r2.set_ylabel("R²")
             ax_r2.set_xlabel("Aperiodic Mode")
             plt.tight_layout()
@@ -414,7 +414,7 @@ def tune_aperiodic_mode(df, freq_range, max_n_peaks, show_errors=True):
             # MSE plot
             fig_err, ax_err = plt.subplots()
             ax_err.plot(aperiodic_modes, errors, "ro-")
-            ax_err.set_title(f"MSE - Condition {i+1}")
+            ax_err.set_title(f"MSE - {conditions[i]}")
             ax_err.set_ylabel("MSE")
             ax_err.set_xlabel("Aperiodic Mode")
             plt.tight_layout()
@@ -429,7 +429,7 @@ def tune_aperiodic_mode(df, freq_range, max_n_peaks, show_errors=True):
     fig.update_layout(
         title='Spectral Model Fits for Different Aperiodic Modes',
         xaxis_title='Frequency (Hz)',
-        yaxis_title='Power',
+        yaxis_title='log(Power)',
         legend_title='Model Configurations',
         template='plotly_white'
     )
@@ -442,7 +442,7 @@ def tune_aperiodic_mode(df, freq_range, max_n_peaks, show_errors=True):
 
 
         
-def tune_peak_threshold(df, freq_range, max_n_peaks, aperiodic_mode, start1, stop1, num1, show_errors=True):
+def tune_peak_threshold(df, freq_range, max_n_peaks, aperiodic_mode, start1, stop1, num1, conditions, show_errors=True):
     fig = go.Figure()
     error_figs_base64 = []
     peak_threshold_range = np.logspace(start = np.log10(start1), stop = np.log10(stop1), num = num1)
@@ -471,7 +471,7 @@ def tune_peak_threshold(df, freq_range, max_n_peaks, aperiodic_mode, start1, sto
             model_freqs, model_fit = nm.freqs, nm.get_model()  # Assuming the attributes are named like this
             fig.add_trace(go.Scatter(x=model_freqs, y=model_fit,
                                     mode='lines',
-                                    name=f'PT {peak_threshold:.3g} (R²={nm.r_squared_:.2f}) - Condition{i+1}'))
+                                    name=f'PT {peak_threshold:.3g} (R²={nm.r_squared_:.2f}) - {conditions[i]}'))
           except Exception as e:
             #model_fail = "Model fitting failed. Please choose your settings again."
             if i + 1 not in failed_conditions:
@@ -479,13 +479,13 @@ def tune_peak_threshold(df, freq_range, max_n_peaks, aperiodic_mode, start1, sto
 
       # Add the original data as a baseline (optional)
       fig.add_trace(go.Scatter(x=nm.freqs, y=nm.get_data(),
-                              mode='lines', name=f'Original Spectrum - Condition{i+1}',
+                              mode='lines', name=f'Original Spectrum - {conditions[i]}',
                               line=dict(color='black', dash='dash')))
                               
       if show_errors:
         fig_r2, ax_r2 = plt.subplots()
         ax_r2.plot(peak_threshold_range, r2s, "bo-")
-        ax_r2.set_title(f"R² - Condition {i+1}")
+        ax_r2.set_title(f"R² - {conditions[i]}")
         ax_r2.set_ylabel("R²")
         ax_r2.set_xlabel("Peak Threshold")
         plt.tight_layout()
@@ -499,6 +499,7 @@ def tune_peak_threshold(df, freq_range, max_n_peaks, aperiodic_mode, start1, sto
         
         fig_err, ax_err = plt.subplots()
         ax_err.plot(peak_threshold_range, errors, "ro-")
+        ax_err.set_title(f"MSE - {conditions[i]}")
         ax_err.set_ylabel("MSE")
         ax_err.set_xlabel("Peak Threshold")
         plt.tight_layout()
@@ -514,7 +515,7 @@ def tune_peak_threshold(df, freq_range, max_n_peaks, aperiodic_mode, start1, sto
     fig.update_layout(
         title='Spectral Model Fits Across Different Peak Thresholds (PTs)',
         xaxis_title='Frequency (Hz)',
-        yaxis_title='Power',
+        yaxis_title='log(Power)',
         legend_title='Model Configurations',
         template='plotly_white'
     )
@@ -609,7 +610,7 @@ def preprocess_powers(subset_analyzed, fs=2000, nperseg=4000, freq_range=[1, 175
 #     return fig
 
 
-def new_fit_fooof(df, freq_range = [1,300],
+def new_fit_fooof(df, conditions, freq_range = [1,300],
                max_n_peaks = 10000, aperiodic_mode = "fixed", plt_log = False):
 
    # Initialize model object
@@ -619,12 +620,12 @@ def new_fit_fooof(df, freq_range = [1,300],
      filtered_powers_np = np.array(dataframe['Average Power'])
    
      fm = SpectralModel(peak_width_limits=freq_range, max_n_peaks = max_n_peaks, aperiodic_mode = aperiodic_mode)
-     print(f"--- Report - Condition {i+1} ---")
+     print(f"--- Report - {conditions[i]} ---")
      fm.report(filtered_freqs_np, filtered_powers_np, freq_range)
 
 
 # Plot all fooof fits in one graph
-def plot_fooof_fits(df, freq_range, max_n_peaks, aperiodic_mode, plt_log=False):#, condition_names=None):
+def plot_fooof_fits(df, freq_range, max_n_peaks, aperiodic_mode, conditions, plt_log=False):#, condition_names=None):
   figures=[]
   for i in range(0, len(df)):
       # Initialize storage
@@ -645,18 +646,18 @@ def plot_fooof_fits(df, freq_range, max_n_peaks, aperiodic_mode, plt_log=False):
 
       fig.add_trace(go.Scatter(x=x_freqs, y=model_fit,
                                mode='lines',
-                               name=f'Full Model Fit - Condition {i+1}',
+                               name=f'Full Model Fit - {conditions[i]}',
                                line=dict(color='red')))
 
       fig.add_trace(go.Scatter(x=x_freqs, y=aperiodic_fit,
                                mode='lines',
-                               name=f'Aperiodic Fit - Condition {i+1}',
+                               name=f'Aperiodic Fit - {conditions[i]}',
                                line=dict(color='blue', dash='dash')))
 
       # Add the original data as a baseline
       fig.add_trace(go.Scatter(x=x_freqs, y=fm.get_data(),
                                mode='lines',
-                               name=f'Original Spectrum - Condition {i+1}',
+                               name=f'Original Spectrum - {conditions[i]}',
                                line=dict(color='black')))
       
       model_peak_params = fm.get_params('peak_params')
@@ -691,7 +692,7 @@ def plot_fooof_fits(df, freq_range, max_n_peaks, aperiodic_mode, plt_log=False):
         
       # Customize the layout
       fig.update_layout(
-          title=f"FOOOF Model - Condition {i+1}",
+          title=f"FOOOF Model - {conditions[i]}",
           xaxis_title='log(Frequency)' if plt_log else 'Frequency',
           yaxis_title='log(Power)',
           template='plotly_white'

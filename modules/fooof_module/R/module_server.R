@@ -249,7 +249,7 @@ module_server <- function(input, output, session, ...){
 
       # Step 3: run analysis to get the results
       results <- pipeline$run(
-        names = c('power_outputs', 'fitted_fooof', 'power_outputs_list', 'conditions_analyzed'),
+        names = c('power_outputs', 'fitted_fooof', 'power_outputs_list', 'conditions_analyzed_1'),
 
         scheduler = "none",
         type = "vanilla"
@@ -260,7 +260,7 @@ module_server <- function(input, output, session, ...){
       local_data$power_outputs <- results$power_outputs
       local_data$fitted_fooof <- results$fitted_fooof
       local_data$power_outputs_list <- results$power_outputs_list
-      local_data$conditions_analyzed <- results$conditions_analyzed
+      local_data$conditions_analyzed_1 <- results$conditions_analyzed_1
       local_reactives$update_outputs <- Sys.time()
 
       return()
@@ -469,6 +469,7 @@ module_server <- function(input, output, session, ...){
     # retrieve the `power_outputs` from `local_data`
     power_outputs <- local_data$power_outputs
     power_outputs_list <- local_data$power_outputs_list
+    conditions_analyzed_1 <- local_data$conditions_analyzed_1
 
     pipeline_settings <- pipeline$get_settings()
 
@@ -482,7 +483,7 @@ module_server <- function(input, output, session, ...){
     # shared.plot_trials(power_outputs, individual_trials=individual_trials)
 
     shared <- pipeline$python_module(type = "shared")
-    plot <- shared$plot_trials(power_outputs_list, individual_trials = individual_trials)
+    plot <- shared$plot_trials(power_outputs_list, conditions_analyzed_1, individual_trials = individual_trials)
 
     return(shiny::HTML(rpymat::py_to_r(plot$to_html())))
   })
@@ -532,6 +533,7 @@ module_server <- function(input, output, session, ...){
     # power <- fitted_fooof$power
     # freq_range <- fitted_fooof$freq_range
     power_outputs_list <- local_data$power_outputs_list
+    conditions_analyzed_1 <- local_data$conditions_analyzed_1
 
     pipeline_settings <- pipeline$get_settings()
 
@@ -542,7 +544,7 @@ module_server <- function(input, output, session, ...){
 
     shared <- pipeline$python_module(type = "shared")
     report <- reticulate::py_capture_output({
-      shared$new_fit_fooof(power_outputs_list, freq_range = freq_range, max_n_peaks=max_n_peaks, aperiodic_mode=aperiodic_mode, plt_log=plt_log)
+      shared$new_fit_fooof(power_outputs_list, conditions_analyzed_1, freq_range = freq_range, max_n_peaks=max_n_peaks, aperiodic_mode=aperiodic_mode, plt_log=plt_log)
     })
     cat(report)
   })
@@ -616,6 +618,8 @@ module_server <- function(input, output, session, ...){
     )
 
     power_outputs_list <- local_data$power_outputs_list
+    conditions_analyzed_1 <- local_data$conditions_analyzed_1
+
     pipeline_settings <- pipeline$get_settings()
 
     freq_range_aperiodic_tuning <- pipeline_settings$freq_range_aperiodic_tuning
@@ -644,6 +648,7 @@ module_server <- function(input, output, session, ...){
       power_outputs_list,
       freq_range_aperiodic_tuning,
       max_n_peaks_aperiodic_tuning,
+      conditions_analyzed_1,
       show_errors = TRUE
     ))
 
@@ -666,7 +671,7 @@ module_server <- function(input, output, session, ...){
         style = "border: 2px solid #ddd; border-radius: 8px; padding: 15px; margin-top: 20px; background-color: #fafafa;",
         htmltools::tags$div(
           style = "font-weight: bold; margin-bottom: 11px;",
-          paste("Error Plots - Condition", (i + 1) %/% 2)
+          paste("Error Plots -", conditions_analyzed_1[(i + 1) %/% 2])
         ),
         htmltools::tags$div(
           style = "display: flex; justify-content: space-around; flex-wrap: wrap;",
@@ -698,6 +703,8 @@ module_server <- function(input, output, session, ...){
     )
 
     power_outputs_list <- local_data$power_outputs_list
+    conditions_analyzed_1 <- local_data$conditions_analyzed_1
+
     pipeline_settings <- pipeline$get_settings()
 
     freq_range_tuning_max_n_peaks <- pipeline_settings$freq_range_tuning_max_n_peaks
@@ -728,6 +735,7 @@ module_server <- function(input, output, session, ...){
       freq_range_tuning_max_n_peaks,
       aperiodic_mode_tuning_max_n_peaks,
       peaks_range_tuning_max_n_peaks,
+      conditions_analyzed_1,
       show_errors = TRUE
     ))
 
@@ -750,7 +758,7 @@ module_server <- function(input, output, session, ...){
         style = "border: 2px solid #ddd; border-radius: 8px; padding: 15px; margin-top: 20px; background-color: #fafafa;",
         htmltools::tags$div(
           style = "font-weight: bold; margin-bottom: 11px;",
-          paste("Error Plots - Condition", (i + 1) %/% 2)
+          paste("Error Plots -", conditions_analyzed_1[(i + 1) %/% 2])
         ),
         htmltools::tags$div(
           style = "display: flex; justify-content: space-around; flex-wrap: wrap;",
@@ -782,6 +790,8 @@ module_server <- function(input, output, session, ...){
     )
 
     power_outputs_list <- local_data$power_outputs_list
+    conditions_analyzed_1 <- local_data$conditions_analyzed_1
+
     pipeline_settings <- pipeline$get_settings()
 
     freq_range_tuning_peak_threshold <- pipeline_settings$freq_range_tuning_peak_threshold
@@ -816,6 +826,7 @@ module_server <- function(input, output, session, ...){
       threshold_value_range_tuning_peak_threshold[1],
       threshold_value_range_tuning_peak_threshold[2],
       number_of_threshold_value_tuning_peak_threshold,
+      conditions_analyzed_1,
       show_errors = TRUE
     ))
 
@@ -838,7 +849,7 @@ module_server <- function(input, output, session, ...){
         style = "border: 2px solid #ddd; border-radius: 8px; padding: 15px; margin-top: 20px; background-color: #fafafa;",
         htmltools::tags$div(
           style = "font-weight: bold; margin-bottom: 11px;",
-          paste("Error Plots - Condition", (i + 1) %/% 2)
+          paste("Error Plots -", conditions_analyzed_1[(i + 1) %/% 2])
         ),
         htmltools::tags$div(
           style = "display: flex; justify-content: space-around; flex-wrap: wrap;",
@@ -873,7 +884,7 @@ module_server <- function(input, output, session, ...){
     # retrieve the `power_outputs` from `local_data`
     power_outputs <- local_data$power_outputs
     power_outputs_list <- local_data$power_outputs_list
-    conditions_analyzed <- local_data$conditions_analyzed
+    conditions_analyzed_1 <- local_data$conditions_analyzed_1
 
     pipeline_settings <- pipeline$get_settings()
 
@@ -883,7 +894,7 @@ module_server <- function(input, output, session, ...){
     plt_log <- !isFALSE(input$fooof_bool)
 
     shared <- pipeline$python_module(type = "shared")
-    plot_list <- rpymat::py_to_r(shared$plot_fooof_fits(power_outputs_list, freq_range, max_n_peaks, aperiodic_mode, plt_log = plt_log))
+    plot_list <- rpymat::py_to_r(shared$plot_fooof_fits(power_outputs_list, freq_range, max_n_peaks, aperiodic_mode, conditions_analyzed_1, plt_log = plt_log))
 
     # Convert each Python plot to HTML and combine
     html_output <- lapply(plot_list, function(p) {
