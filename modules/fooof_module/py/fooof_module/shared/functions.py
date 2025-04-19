@@ -249,13 +249,12 @@ def plot_trials(df, conditions, individual_trials=False):
                       mode='lines',
                       name=col
                   ))
-  
-  
+    
     # Update layout for grid and other settings
     fig.update_layout(
-        title='log(Power) vs Frequency',
+        title='log<sub>10</sub>(Power) vs Frequency (Individual Trials)' if individual_trials else 'log<sub>10</sub>(Power) vs Frequency (Average)',
         xaxis_title='Frequency',
-        yaxis_title='log(Power)',
+        yaxis_title='log<sub>10</sub>(Power)',
         showlegend=True,
         template='plotly_white',
         xaxis=dict(showgrid=True),
@@ -343,7 +342,7 @@ def tune_max_n_peaks(df, freq_range, aperiodic_mode, peaks_range, conditions, sh
   fig.update_layout(
       title='Spectral Model Fits Across Different Peak Numbers',
       xaxis_title='Frequency (Hz)',
-      yaxis_title='log(Power)',
+      yaxis_title='log<sub>10</sub>(Power)',
       legend_title='Model',
       template='plotly_white'
   )
@@ -429,7 +428,7 @@ def tune_aperiodic_mode(df, freq_range, max_n_peaks, conditions, show_errors=Tru
     fig.update_layout(
         title='Spectral Model Fits for Different Aperiodic Modes',
         xaxis_title='Frequency (Hz)',
-        yaxis_title='log(Power)',
+        yaxis_title='log<sub>10</sub>(Power)',
         legend_title='Model Configurations',
         template='plotly_white'
     )
@@ -515,7 +514,7 @@ def tune_peak_threshold(df, freq_range, max_n_peaks, aperiodic_mode, start1, sto
     fig.update_layout(
         title='Spectral Model Fits Across Different Peak Thresholds (PTs)',
         xaxis_title='Frequency (Hz)',
-        yaxis_title='log(Power)',
+        yaxis_title='log<sub>10</sub>(Power)',
         legend_title='Model Configurations',
         template='plotly_white'
     )
@@ -693,8 +692,8 @@ def plot_fooof_fits(df, freq_range, max_n_peaks, aperiodic_mode, conditions, plt
       # Customize the layout
       fig.update_layout(
           title=f"FOOOF Model - {conditions[i]}",
-          xaxis_title='log(Frequency)' if plt_log else 'Frequency',
-          yaxis_title='log(Power)',
+          xaxis_title='log<sub>10</sub>(Frequency)' if plt_log else 'Frequency',
+          yaxis_title='log<sub>10</sub>(Power)',
           template='plotly_white'
       )
       figures.append(fig)

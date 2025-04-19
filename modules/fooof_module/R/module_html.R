@@ -25,7 +25,7 @@ module_html <- function(){
 
               # a collection of inputs
               ravedash::flex_group_box(
-                title = "Fooof Parameters",
+                title = "FOOOF Parameters",
 
                 shidashi::flex_item(
                   shiny::checkboxInput(
@@ -60,8 +60,8 @@ module_html <- function(){
                     label = "Frequency range",
                     min = 1,
                     max = 300,
-                    value = c(1, 300),
-                    step = 0.1,
+                    value = c(1, 200),
+                    step = 1,
                     post = " Hz"
                   )
                 ),
@@ -111,8 +111,8 @@ module_html <- function(){
                     label = "Frequency range",
                     min = 1,
                     max = 300,
-                    value = c(1, 300),
-                    step = 0.1,
+                    value = c(1, 200),
+                    step = 1,
                     post = "Hz"
                   )
                 ),
@@ -151,8 +151,8 @@ module_html <- function(){
                     label = "Frequency range",
                     min = 1,
                     max = 300,
-                    value = c(1, 300),
-                    step = 0.1,
+                    value = c(1, 200),
+                    step = 1,
                     post = "Hz"
                   )
                 ),
@@ -181,8 +181,8 @@ module_html <- function(){
                     label = "Frequency range",
                     min = 1,
                     max = 300,
-                    value = c(1, 300),
-                    step = 0.1,
+                    value = c(1, 200),
+                    step = 1,
                     post = "Hz"
                   )
                 ),
@@ -253,7 +253,7 @@ module_html <- function(){
 
 
             ravedash::output_card(
-              'Average',
+              'Power Spectrum',
               class_body = "no-padding fill-width height-450 min-height-450 resize-vertical",
               shiny::div(
                 class = 'position-relative fill',
@@ -286,7 +286,7 @@ module_html <- function(){
             # ),
 
             ravedash::output_card(
-              "Fooof Fits Plot",
+              "FOOOF Fits Plot",
               class_body = "no-padding fill-width height-450 min-height-450 resize-vertical",
               shiny::div(
                 class = 'position-relative fill',

@@ -25,82 +25,41 @@ condition_groupings:
     - meant_v
     - press_AV
   '2':
-    label: Testing
+    label: Visual
     conditions:
-    - AdriveVlast
+    - last_v
+    - drive_v
+    - known_v
+    - meant_v
   '3':
-    label: TestingW
+    label: Audio
     conditions:
+    - last_a
     - drive_a
+    - known_a
+    - meant_a
 epoch_name: auditory_onset
 freq_range:
 - 1
-- 300
+- 200
 freq_range_aperiodic_tuning:
 - 1
-- 100
+- 200
 freq_range_tuning_max_n_peaks:
 - 1
-- 100
+- 200
 freq_range_tuning_peak_threshold:
 - 1
-- 100
+- 200
 individual_trials: no
-max_n_peaks: 15
-max_n_peaks_aperiodic_tuning: 8
-max_n_peaks_tuning_peak_threshold: 8
+max_n_peaks: 7
+max_n_peaks_aperiodic_tuning: 7
+max_n_peaks_tuning_peak_threshold: 7
 number_of_threshold_value_tuning_peak_threshold: 50
 peaks_range_tuning_max_n_peaks:
 - 1
 - 2
 - 3
-- 4
-- 5
-- 6
-- 7
-- 8
-- 9
-- 10
-- 11
-- 12
-- 13
-- 14
-- 15
-- 16
-- 17
-- 18
-- 19
-- 20
-- 21
-- 22
-- 23
-- 24
-- 25
-- 26
-- 27
-- 28
-- 29
-- 30
-- 31
-- 32
-- 33
-- 34
-- 35
-- 36
-- 37
-- 38
-- 39
-- 40
-- 41
-- 42
-- 43
-- 44
-- 45
-- 46
-- 47
-- 48
-- 49
-- 50
 plt_log: no
 project_name: demo
 reference_name: default

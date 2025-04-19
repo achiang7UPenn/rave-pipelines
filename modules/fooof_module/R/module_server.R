@@ -247,6 +247,19 @@ module_server <- function(input, output, session, ...){
       # Step 2: save user inputs to settings.yaml
       pipeline$set_settings(.list = pipeline_settings)
 
+      dipsaus::shiny_alert2(
+        title = "Running",
+        text = "Applying fooof... Please wait. The results will be displayed momentarily.",
+        auto_close = FALSE,
+        buttons = FALSE,
+        icon = "info"
+      )
+
+      on.exit({
+        Sys.sleep(0.5)
+        dipsaus::close_alert2()
+      }, add = TRUE, after = FALSE)
+
       # Step 3: run analysis to get the results
       results <- pipeline$run(
         names = c('power_outputs', 'fitted_fooof', 'power_outputs_list', 'conditions_analyzed_1'),
@@ -263,6 +276,8 @@ module_server <- function(input, output, session, ...){
       local_data$conditions_analyzed_1 <- results$conditions_analyzed_1
       local_reactives$update_outputs <- Sys.time()
 
+      Sys.sleep(0.5)
+      dipsaus::close_alert2()
       return()
 
     }),
@@ -754,6 +769,7 @@ module_server <- function(input, output, session, ...){
     # Group into condition boxes (2 images per condition)
     condition_boxes <- lapply(seq(1, length(matplotlib_imgs), by = 2), function(i) {
       row_imgs <- matplotlib_imgs[i:min(i+1, length(matplotlib_imgs))]
+
       htmltools::tags$div(
         style = "border: 2px solid #ddd; border-radius: 8px; padding: 15px; margin-top: 20px; background-color: #fafafa;",
         htmltools::tags$div(
