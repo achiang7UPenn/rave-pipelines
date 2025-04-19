@@ -7,6 +7,7 @@ import pandas as pd
 import re
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+from plotly.colors import qualitative
 import tempfile
 import base64
 import os
@@ -218,25 +219,71 @@ def add_mean_and_std(df, mean_col_name="Average Power", std_col_name="StdDev"):
 
     return df
 
-def plot_trials(df, conditions, individual_trials=False):
+def plot_trials(df, conditions, Std_count=1, individual_trials=False):
     fig = go.Figure()
-    for i in range(0, len(df)):
+    
+    # Use Plotly's default qualitative color palette
+    color_palette = qualitative.Plotly
+    
+    def to_rgba(color, alpha=0.2):
+      """Convert 'rgb(...)' or '#...' to rgba(...) with transparency"""
+      if isinstance(color, str):
+        if color.startswith('#'):
+          # Hex format → convert to rgba
+          color = color.lstrip('#')
+          r, g, b = tuple(int(color[i:i+2], 16) for i in (0, 2, 4))
+          return f'rgba({r}, {g}, {b}, {alpha})'
+      elif color.startswith('rgb'):
+          # Already in rgb(...) format → just add alpha
+          return color.replace('rgb', 'rgba').replace(')', f',{alpha})')
+    # Fallback: transparent black
+      return f'rgba(0, 0, 0, {alpha})'
+    
+    
+    for i in range(len(df)):
       dataframe = df[i]
+      freq = dataframe['filtered_frequency']
+      mean_log = np.log10(dataframe['Average Power'])
+      std_log = np.log10(dataframe['Average Power'] + dataframe['StdDev']) - mean_log
+      upper = mean_log + (Std_count * std_log)
+      lower = mean_log - (Std_count * std_log)
       
+      # Select color for this condition
+      base_color = color_palette[i % len(color_palette)]
+      fill_color = to_rgba(base_color, alpha=0.2)
+
+
       # Add the first trace (filt_powers electrode_14_avg)
       fig.add_trace(go.Scatter(
-          x=dataframe['filtered_frequency'],
-          y=np.log10(dataframe['Average Power']),
+          x=freq,
+          y=mean_log,
           mode='lines',
-          name=f'Average Power - {conditions[i]}'
+          name=f'Average Power - {conditions[i]}',
+          line=dict(width=2, color=base_color)
       ))
+
   
-      # Add the second trace (filt_powers electrode_14_std)
+      # Plot the upper bound (invisible but used to define area)
       fig.add_trace(go.Scatter(
-          x=dataframe['filtered_frequency'],
-          y=np.log10(dataframe['StdDev']),
+          x=freq,
+          y=upper,
           mode='lines',
-          name=f'Standard Deviation - {conditions[i]}'
+          line=dict(width=0),
+          showlegend=False,
+          hoverinfo='skip'
+      ))
+      
+      
+      # Plot the lower bound and fill to upper
+      fig.add_trace(go.Scatter(
+          x=freq,
+          y=lower,
+          mode='lines',
+          fill='tonexty',
+          fillcolor=fill_color,
+          line=dict(width=0),
+          name=f'±{Std_count} Std Dev - {conditions[i]}',
+          hoverinfo='skip'
       ))
   
       if individual_trials:
@@ -244,7 +291,7 @@ def plot_trials(df, conditions, individual_trials=False):
           for col in dataframe.columns:
               if col not in ['filtered_frequency', 'Average Power', 'StdDev']:
                   fig.add_trace(go.Scatter(
-                      x=dataframe['filtered_frequency'],
+                      x=freq,
                       y=np.log(dataframe[col]),
                       mode='lines',
                       name=col
