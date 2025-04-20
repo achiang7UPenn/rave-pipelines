@@ -37,6 +37,19 @@ module_html <- function(){
 
                 shidashi::flex_break(),
 
+                shidashi::flex_item(
+                  shiny::sliderInput(
+                    inputId = ns("fooof_standard_deviation"),
+                    label = "Standard Deviation",
+                    min = 0,
+                    max = 3,
+                    value = 1,
+                    step = 1,
+                  )
+                ),
+
+                shidashi::flex_break(),
+
                 # first item
                 shidashi::flex_item(
                   shiny::sliderInput(

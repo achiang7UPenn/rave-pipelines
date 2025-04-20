@@ -677,6 +677,8 @@ def plot_fooof_fits(df, freq_range, max_n_peaks, aperiodic_mode, conditions, plt
       # Initialize storage
       dataframe = df[i]
       center_frequencies = []
+      power_width = []
+      band_width = []
 
       filtered_freqs_np = np.array(dataframe['filtered_frequency'])
       filtered_powers_np = np.array(dataframe['Average Power'])
@@ -709,22 +711,50 @@ def plot_fooof_fits(df, freq_range, max_n_peaks, aperiodic_mode, conditions, plt
       model_peak_params = fm.get_params('peak_params')
       for j in range(0, len(model_peak_params)):
         center_frequencies.append(model_peak_params[j][0])
+      for j in range(0, len(model_peak_params)):
+        power_width.append(model_peak_params[j][1])
+      for j in range(0, len(model_peak_params)):
+        band_width.append(model_peak_params[j][2])
         
-      for peak in center_frequencies:
+      for idx, peak in enumerate(center_frequencies):
             peak_x = np.log10(peak) if plt_log else peak
+            bandwidth = band_width[idx]
+            powerwidth = power_width[idx]
             fig.add_shape(
                 type='line',
                 x0=peak_x, x1=peak_x,
                 y0=min(model_fit)-1, y1=max(model_fit)+0.5,
-                line=dict(color="green", dash="dot", width=2),
-                name=f'Peak at {peak_x:.2f}'
+                line=dict(color="green", dash="dot", width=2)
             )
             
             fig.add_trace(go.Scatter(
-                x=[None], y=[None],
-                mode='lines',
-                name=f'Peak at {peak_x:.2f} Hz',
-                line=dict(color="green", dash="dot", width=2)
+                x=[peak_x], 
+                y=[max(model_fit) + 1],
+                text=[f'CF: {peak:.2f}'],
+                mode='text',
+                textposition='top center',
+                textfont=dict(size=6),
+                showlegend=False
+            ))
+            
+            fig.add_trace(go.Scatter(
+                x=[peak_x], 
+                y=[max(model_fit) + 0.8],
+                text=[f'PW: {powerwidth:.2f}'],
+                mode='text',
+                textposition='top center',
+                textfont=dict(size=6),
+                showlegend=False
+            ))
+            
+            fig.add_trace(go.Scatter(
+                x=[peak_x], 
+                y=[max(model_fit) + 0.6],
+                text=[f'BW: {bandwidth:.2f}'],
+                mode='text',
+                textposition='top center',
+                textfont=dict(size=6),
+                showlegend=False
             ))
       
       # if condition_names:

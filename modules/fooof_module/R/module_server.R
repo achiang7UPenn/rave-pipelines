@@ -212,6 +212,7 @@ module_server <- function(input, output, session, ...){
 
         # Customized inputs
         individual_trials = input$fooof_ind_trials,
+        standard_deviation = input$fooof_standard_deviation,
         window_length = input$fooof_winlen,
         freq_range = input$fooof_freq_range,
         max_n_peaks = input$fooof_max_n_peaks,
@@ -489,6 +490,7 @@ module_server <- function(input, output, session, ...){
     pipeline_settings <- pipeline$get_settings()
 
     individual_trials <- !isFALSE(input$fooof_ind_trials)
+    standard_deviation <- pipeline_settings$standard_deviation
 
     # For debug purposes, run
     # pipeline <- raveio::pipeline("fooof_module", paths = "/Users/dipterix/Dropbox (Personal)/projects/rave-pipeline-ese2025/modules/")
@@ -498,7 +500,7 @@ module_server <- function(input, output, session, ...){
     # shared.plot_trials(power_outputs, individual_trials=individual_trials)
 
     shared <- pipeline$python_module(type = "shared")
-    plot <- shared$plot_trials(power_outputs_list, conditions_analyzed_1, individual_trials = individual_trials)
+    plot <- shared$plot_trials(power_outputs_list, conditions_analyzed_1, Std_count = standard_deviation, individual_trials = individual_trials)
 
     return(shiny::HTML(rpymat::py_to_r(plot$to_html())))
   })

@@ -100,6 +100,7 @@ conditions_analyzed_1 <- lapply(condition_keys, function(key)
 conditions_analyzed_1 = r.conditions_analyzed_1
 subset_analyzed = r.subset_analyzed
 sample_rate = r.sample_rate
+standard_deviation = r.standard_deviation
 window_length = r.window_length
 freq_range = r.freq_range
 max_n_peaks = r.max_n_peaks
