@@ -1,0 +1,42 @@
+bibentry(bibtype = "Article",
+         title        = "Parameterizing neural power spectra into periodic and aperiodic components",
+         author       = c(as.person("Thomas Donoghue"),
+                          as.person("Matar Haller"),
+                          as.person("Erik J. Peterson"),
+                          as.person("Paroma Varma"),
+                          as.person("Priyadarshini Sebastian")),
+         header       = "[FOOOF] This module uses the method published by:",
+         year         = "2020",
+         volume       = "23",
+         number       = "12",
+         pages = "1655--1665",
+         doi          = "10.1038/s41593-020-00744-x",
+         publisher    = "Nature Publishing Group US New York",
+         journal      = "Nature Neuroscience",
+         textVersion  = "[1] Donoghue, T., Haller, M., Peterson, E.J. et al. Parameterizing neural power spectra into periodic and aperiodic components. Nat Neurosci 23, 1655–1665 (2020)."
+)
+
+bibentry(bibtype = "Article",
+         title        = "{RAVE}: Comprehensive open-source software for reproducible analysis and visualization of intracranial EEG data",
+         author       = c(as.person("John F. Magnotti"),
+                          as.person("Zhengjia Wang"),
+                          as.person("Michael S. Beauchamp")),
+         journal      = "NeuroImage",
+         year         = "2020",
+         volume       = "223",
+         pages        = "117341",
+         doi          = "10.1016/j.neuroimage.2020.117341",
+         header       = "[RAVE] To cite RAVE:",
+         textVersion  = "[2] Magnotti, J.F., Wang, Z. and Beauchamp, M.S., 2020. RAVE: Comprehensive open-source software for reproducible analysis and visualization of intracranial EEG data. NeuroImage, 223, p.117341."
+)
+
+
+bibentry(
+  bibtype = "Manual", year = "2020",
+  author       = c(as.person("FOOOF Contributors")),
+  title        = "FOOOF - fitting oscillations & one over f",
+  url = "https://fooof-tools.github.io/fooof",
+  textVersion  = "[3] FOOOF - fitting oscillations & one over f",
+  header       = "[FOOOF Python Library]"
+)
+

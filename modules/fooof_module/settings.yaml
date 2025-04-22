@@ -24,14 +24,6 @@ condition_groupings:
     - meant_av
     - meant_v
     - press_AV
-  '2':
-    label: W
-    conditions:
-    - AdriveVlast
-  '3':
-    label: WWW
-    conditions:
-    - AmeantVdrive
 epoch_name: auditory_onset
 freq_range:
 - 1
@@ -57,7 +49,7 @@ peaks_range_tuning_max_n_peaks:
 plt_log: no
 project_name: demo
 reference_name: default
-standard_deviation: 1
+standard_deviation: 3
 subject_code: DemoSubject
 threshold_value_range_tuning_peak_threshold:
 - 1

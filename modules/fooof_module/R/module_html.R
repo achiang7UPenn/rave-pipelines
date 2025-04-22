@@ -23,9 +23,8 @@ module_html <- function(){
             ravedash::input_card(
               title = "Configure Analysis",
 
-              # a collection of inputs
               ravedash::flex_group_box(
-                title = "FOOOF Parameters",
+                title = "Power Spectrum Settings",
 
                 shidashi::flex_item(
                   shiny::checkboxInput(
@@ -46,9 +45,13 @@ module_html <- function(){
                     value = 1,
                     step = 1,
                   )
-                ),
+                )
 
-                shidashi::flex_break(),
+              ),
+
+              # a collection of inputs
+              ravedash::flex_group_box(
+                title = "FOOOF Parameters",
 
                 # first item
                 shidashi::flex_item(
