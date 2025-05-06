@@ -1,0 +1,13 @@
+The data used in the figures comes from electrophysiological recordings (voltage traces) stored in HDF5 (.h5) files, where each file corresponds to a specific electrode.
+The raw voltage data is extracted for specified blocks, electrode numbers, time windows (timestamp and duration in seconds), and sampling frequencies using Rave's built-in subject loading functions.
+
+Additionally, the main.rmd file uses the RAVE framework to load subject-specific data, including:
+
+Raw voltage traces from selected electrodes (e.g., electrode 14),
+Trial-level condition labels (like auditory, visual, or audio-visual),
+Epoch tables describing the timing and condition of each trial,
+Sampling rate information
+
+The processed data (used in figures) includes filtered power values over user-specified frequency ranges (e.g., 1–175 Hz), computed via the preprocess_data and preprocess_powers functions. Each condition or trial type is grouped and analyzed separately.
+Thus, the figures are generated using a combination of raw iEEG voltage recordings and trial metadata from RAVE, which is then processed through both Python and R scripts to extract frequency features and statistical summaries (mean, standard deviation) for visualization.
+As part of this process, we apply the FOOOF algorithm to decompose the power spectra into aperiodic and periodic components, enabling more precise feature extraction.
